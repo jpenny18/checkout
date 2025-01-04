@@ -476,6 +476,27 @@
         font-size: 1.2em;
         margin-bottom: 20px;
       }
+
+      .form-group input:invalid,
+      .form-group select:invalid {
+        border-color: #ff4444;
+      }
+
+      .required-field::after {
+        content: " *";
+        color: #ff4444;
+      }
+
+      .validation-message {
+        color: #ff4444;
+        font-size: 0.8em;
+        margin-top: 5px;
+        display: none;
+      }
+
+      .form-group input:invalid + .validation-message {
+        display: block;
+      }
     </style>
   </head>
   <body>
@@ -560,18 +581,18 @@
           <form class="checkout-form">
             <div class="form-row">
               <div class="form-group">
-                <label for="firstName">First Name</label>
+                <label for="firstName">First Name *</label>
                 <input type="text" id="firstName" required />
               </div>
               <div class="form-group">
-                <label for="lastName">Last Name</label>
+                <label for="lastName">Last Name *</label>
                 <input type="text" id="lastName" required />
               </div>
             </div>
 
             <div class="form-row">
               <div class="form-group">
-                <label for="email">Email</label>
+                <label for="email">Email *</label>
                 <input type="email" id="email" required />
               </div>
               <div class="form-group">
@@ -593,7 +614,7 @@
                 </select>
               </div>
               <div class="form-group">
-                <label for="phone">Phone Number</label>
+                <label for="phone">Phone Number *</label>
                 <input
                   type="tel"
                   id="phone"
@@ -604,7 +625,7 @@
             </div>
 
             <div class="form-group">
-              <label for="country">Country</label>
+              <label for="country">Country *</label>
               <select id="country" required>
                 <option value="Canada">Canada</option>
                 <option value="United States">United States</option>
@@ -1322,18 +1343,47 @@
           .querySelector(".checkout-button")
           .addEventListener("click", (e) => {
             e.preventDefault();
+
+            // Check challenge type selection
             const selectedType = document.querySelector(
               ".challenge-card.selected"
             )?.dataset.type;
-            const selectedAmount = document.querySelector(
-              ".challenge-option.selected"
-            )?.dataset.amount;
-
-            if (!selectedType || !selectedAmount) {
-              alert("Please select a challenge type and amount first");
+            if (!selectedType) {
+              alert("Please select a challenge type");
               return;
             }
 
+            // Check account size selection
+            const selectedAmount = document.querySelector(
+              ".challenge-option.selected"
+            )?.dataset.amount;
+            if (!selectedAmount) {
+              alert("Please select an account size");
+              return;
+            }
+
+            // Check platform selection
+            const selectedPlatform = document.querySelector(
+              ".platform-buttons button.selected"
+            )?.textContent;
+            if (!selectedPlatform) {
+              alert("Please select a trading platform");
+              return;
+            }
+
+            // Check personal details
+            const firstName = document.getElementById("firstName").value.trim();
+            const lastName = document.getElementById("lastName").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const phone = document.getElementById("phone").value.trim();
+            const country = document.getElementById("country").value;
+
+            if (!firstName || !lastName || !email || !phone || !country) {
+              alert("Please fill in all personal details");
+              return;
+            }
+
+            // If all validations pass, show payment modal
             const price = prices[selectedType][selectedAmount];
             const modal = document.querySelector(".payment-modal");
             const selectedAmountDiv = modal.querySelector(".selected-amount");
@@ -1523,44 +1573,51 @@
 
       document.querySelectorAll(".payment-option").forEach((option) => {
         option.addEventListener("click", () => {
-          // Collect all form data
+          const selectedType = document.querySelector(
+            ".challenge-card.selected"
+          )?.dataset.type;
+          const selectedAmount = document.querySelector(
+            ".challenge-option.selected"
+          )?.dataset.amount;
+          const gateway = option.dataset.gateway;
+
+          // Verify we have the correct payment link
+          const paymentLink =
+            paymentGateways[gateway]?.[selectedType]?.[selectedAmount];
+          if (!paymentLink) {
+            alert("Payment option not available for this selection");
+            return;
+          }
+
+          // Collect and validate form data again
           const formData = {
-            firstName: document.getElementById("firstName").value,
-            lastName: document.getElementById("lastName").value,
-            email: document.getElementById("email").value,
-            phone: document.getElementById("phone").value,
+            firstName: document.getElementById("firstName").value.trim(),
+            lastName: document.getElementById("lastName").value.trim(),
+            email: document.getElementById("email").value.trim(),
+            phone: document.getElementById("phone").value.trim(),
             countryCode: document.getElementById("countryCode").value,
             country: document.getElementById("country").value,
             platform: document.querySelector(
               ".platform-buttons button.selected"
             )?.textContent,
-            challengeType: document.querySelector(".challenge-card.selected")
-              .dataset.type,
-            challengeAmount: document.querySelector(
-              ".challenge-option.selected"
-            ).dataset.amount,
+            challengeType: selectedType,
+            challengeAmount: selectedAmount,
           };
 
-          // Validate form data
+          // Final validation
           if (
             !formData.firstName ||
             !formData.lastName ||
             !formData.email ||
             !formData.phone ||
-            !formData.platform
+            !formData.platform ||
+            !formData.country
           ) {
             alert("Please fill in all required fields");
             return;
           }
 
           // Add form data as URL parameters
-          const gateway = option.dataset.gateway;
-          let paymentLink =
-            paymentGateways[gateway][formData.challengeType][
-              formData.challengeAmount
-            ];
-
-          // Append form data to payment link
           const params = new URLSearchParams({
             customer_name: `${formData.firstName} ${formData.lastName}`,
             customer_email: formData.email,
@@ -1569,10 +1626,11 @@
             platform: formData.platform,
             challenge_type: formData.challengeType,
             challenge_amount: formData.challengeAmount,
+            price: prices[selectedType][selectedAmount],
           });
 
-          paymentLink = `${paymentLink}?${params.toString()}`;
-          window.location.href = paymentLink;
+          // Redirect to payment
+          window.location.href = `${paymentLink}?${params.toString()}`;
         });
       });
 

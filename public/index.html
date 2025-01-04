@@ -222,6 +222,12 @@
       @media (max-width: 768px) {
         .checkout-grid {
           grid-template-columns: 1fr;
+          gap: 15px;
+        }
+
+        h2 {
+          text-align: center;
+          margin-bottom: 20px;
         }
 
         .form-row {
@@ -230,6 +236,56 @@
 
         .challenge-type-grid {
           grid-template-columns: 1fr;
+        }
+
+        .metrics-container {
+          max-width: 100%;
+          overflow-x: auto;
+          margin: 15px -15px;
+          padding: 0 15px;
+        }
+
+        .metrics-table {
+          font-size: 14px;
+          width: 800px;
+          margin: 0 auto;
+        }
+
+        .metrics-table th,
+        .metrics-table td {
+          padding: 12px 8px;
+          white-space: nowrap;
+        }
+
+        .benefits-section {
+          margin: 0 0 15px 0;
+          padding-bottom: 0;
+        }
+
+        .your-info {
+          margin-top: 15px;
+        }
+
+        .order-preview > *,
+        .your-info > * {
+          margin-bottom: 15px;
+        }
+
+        .order-preview > *:last-child,
+        .your-info > *:last-child {
+          margin-bottom: 0;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .metrics-table {
+          font-size: 13px;
+          width: 700px;
+        }
+
+        .metrics-table th,
+        .metrics-table td {
+          padding: 10px 6px;
         }
       }
 
@@ -477,24 +533,33 @@
         margin-bottom: 20px;
       }
 
-      .form-group input:invalid,
-      .form-group select:invalid {
+      .form-group input.error,
+      .form-group select.error {
         border-color: #ff4444;
+        animation: shake 0.5s;
       }
 
-      .required-field::after {
-        content: " *";
-        color: #ff4444;
+      @keyframes shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-10px);
+        }
+        75% {
+          transform: translateX(10px);
+        }
       }
 
-      .validation-message {
+      .error-message {
         color: #ff4444;
         font-size: 0.8em;
         margin-top: 5px;
         display: none;
       }
 
-      .form-group input:invalid + .validation-message {
+      .error-message.show {
         display: block;
       }
     </style>
@@ -593,11 +658,7 @@
             <div class="form-row">
               <div class="form-group">
                 <label for="email">Email *</label>
-                <input type="email" id="email" required />
-              </div>
-              <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" required />
+                <input type="email" id="email" />
               </div>
             </div>
 
@@ -1344,6 +1405,13 @@
           .addEventListener("click", (e) => {
             e.preventDefault();
 
+            // Reset all error states
+            document
+              .querySelectorAll(".form-group input, .form-group select")
+              .forEach((input) => {
+                input.classList.remove("error");
+              });
+
             // Check challenge type selection
             const selectedType = document.querySelector(
               ".challenge-card.selected"
@@ -1372,14 +1440,25 @@
             }
 
             // Check personal details
-            const firstName = document.getElementById("firstName").value.trim();
-            const lastName = document.getElementById("lastName").value.trim();
-            const email = document.getElementById("email").value.trim();
-            const phone = document.getElementById("phone").value.trim();
-            const country = document.getElementById("country").value;
+            let hasError = false;
+            const fields = {
+              firstName: document.getElementById("firstName"),
+              lastName: document.getElementById("lastName"),
+              email: document.getElementById("email"),
+              phone: document.getElementById("phone"),
+              country: document.getElementById("country"),
+            };
 
-            if (!firstName || !lastName || !email || !phone || !country) {
-              alert("Please fill in all personal details");
+            // Validate each field
+            Object.entries(fields).forEach(([key, field]) => {
+              if (!field.value.trim()) {
+                field.classList.add("error");
+                hasError = true;
+              }
+            });
+
+            if (hasError) {
+              alert("Please fill in all required fields");
               return;
             }
 
@@ -1389,6 +1468,15 @@
             const selectedAmountDiv = modal.querySelector(".selected-amount");
             selectedAmountDiv.textContent = `Selected: ${selectedType} ${selectedAmount} - $${price}`;
             modal.classList.add("active");
+          });
+
+        // Remove error class when user starts typing
+        document
+          .querySelectorAll(".form-group input, .form-group select")
+          .forEach((input) => {
+            input.addEventListener("input", () => {
+              input.classList.remove("error");
+            });
           });
       });
 

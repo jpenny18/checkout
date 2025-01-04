@@ -1,219 +1,1626 @@
-// Add this to your existing JavaScript where the graphs are handled const
-graphUrls = { Gauntlet: { "$50,000":
-"https://yourwebsite.com/graphs#gauntlet-50k", "$100,000":
-"https://yourwebsite.com/graphs#gauntlet-100k", "$300,000":
-"https://yourwebsite.com/graphs#gauntlet-300k" }, Ascendant: { "$10,000":
-"https://yourwebsite.com/graphs#ascendant-10k", "$25,000":
-"https://yourwebsite.com/graphs#ascendant-25k", "$50,000":
-"https://yourwebsite.com/graphs#ascendant-50k" }, Standard: { "$10,000":
-"https://yourwebsite.com/graphs#standard-10k", "$25,000":
-"https://yourwebsite.com/graphs#standard-25k", "$50,000":
-"https://yourwebsite.com/graphs#standard-50k", "$100,000":
-"https://yourwebsite.com/graphs#standard-100k" } }; // Update the graph display
-code challengeOptionsContainer.addEventListener("click", (e) => { if
-(e.target.classList.contains("challenge-option")) { const selectedType =
-document.querySelector(".challenge-card.selected").dataset.type; const
-selectedAmount = e.target.dataset.amount;
-document.querySelectorAll(".challenge-option") .forEach((opt) =>
-opt.classList.remove("selected")); e.target.classList.add("selected");
-selectedPrice = prices[selectedType][selectedAmount]; priceDisplay.textContent =
-`$${selectedPrice}.00`; // Update graph section with iframe or link
-graphContainer.innerHTML = `
-<div class="metrics-container">
-  <h3>${selectedType} ${selectedAmount} Account</h3>
-  <table class="metrics-table">
-    <thead>
-      <tr>
-        <th></th>
-        <th>STEP 1</th>
-        <th>STEP 2</th>
-        <th>STEP 3</th>
-        <th>GAUNTLET FUNDED TRADER</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td class="metrics-row-header">INITIAL BALANCE</td>
-        ${Object.values(performanceMetrics[selectedType][selectedAmount].steps).map(step
-        => `
-        <td>${step.initialBalance}</td>
-        ` ).join('')}
-      </tr>
-      <tr>
-        <td class="metrics-row-header">PROFIT TARGET</td>
-        ${Object.values(performanceMetrics[selectedType][selectedAmount].steps).map(step
-        => `
-        <td>${step.profitTarget}</td>
-        ` ).join('')}
-      </tr>
-      <tr>
-        <td class="metrics-row-header">MAX LOSS</td>
-        ${Object.values(performanceMetrics[selectedType][selectedAmount].steps).map(step
-        => `
-        <td>${step.maxLoss}</td>
-        ` ).join('')}
-      </tr>
-      <tr>
-        <td class="metrics-row-header">MAX DAILY LOSS</td>
-        ${Object.values(performanceMetrics[selectedType][selectedAmount].steps).map(step
-        => `
-        <td>${step.maxDailyLoss}</td>
-        ` ).join('')}
-      </tr>
-      <tr>
-        <td class="metrics-row-header">LEVERAGE</td>
-        ${Object.values(performanceMetrics[selectedType][selectedAmount].steps).map(step
-        => `
-        <td>${step.leverage}</td>
-        ` ).join('')}
-      </tr>
-      <tr>
-        <td class="metrics-row-header">TIME LIMIT</td>
-        ${Object.values(performanceMetrics[selectedType][selectedAmount].steps).map(step
-        => `
-        <td>${step.timeLimit}</td>
-        ` ).join('')}
-      </tr>
-      <tr>
-        <td class="metrics-row-header">PROFIT SHARE</td>
-        ${Object.values(performanceMetrics[selectedType][selectedAmount].steps).map(step
-        => `
-        <td>${step.profitShare}</td>
-        ` ).join('')}
-      </tr>
-      <tr>
-        <td class="metrics-row-header">BONUS</td>
-        ${Object.values(performanceMetrics[selectedType][selectedAmount].steps).map(step
-        => `
-        <td>${step.bonus}</td>
-        ` ).join('')}
-      </tr>
-      <tr>
-        <td class="metrics-row-header">COST</td>
-        ${Object.values(performanceMetrics[selectedType][selectedAmount].steps).map(step
-        => `
-        <td>${step.cost}</td>
-        ` ).join('')}
-      </tr>
-    </tbody>
-  </table>
-</div>
-`; setTimeout(() => { highlightChanges(selectedType, selectedAmount); }, 100); }
-}); function highlightChanges(selectedType, selectedAmount) { const steps =
-performanceMetrics[selectedType][selectedAmount].steps; const cells =
-document.querySelectorAll('.metrics-table td:not(.metrics-row-header)');
-cells.forEach((cell, index) => { const row = Math.floor(index / 4); // 4 columns
-(steps) const col = index % 4; const currentStep = Object.values(steps)[col];
-const nextStep = Object.values(steps)[col + 1]; if (nextStep && cell.textContent
-!== nextStep[Object.keys(currentStep)[row]]) { cell.classList.add('highlight');
-} else { cell.classList.remove('highlight'); } }); } const performanceMetrics =
-{ Gauntlet: { "$50,000": { steps: { "STEP 1": { initialBalance: "$50,000",
-profitTarget: "6%", maxLoss: "6%", maxDailyLoss: "-", leverage: "1:50",
-timeLimit: "UNLIMITED", profitShare: "-", bonus: "5% DISCOUNT", cost: "$50" },
-"STEP 2": { initialBalance: "$50,000", profitTarget: "6%", maxLoss: "6%",
-maxDailyLoss: "-", leverage: "1:50", timeLimit: "UNLIMITED", profitShare: "-",
-bonus: "-", cost: "-" }, "STEP 3": { initialBalance: "$50,000", profitTarget:
-"6%", maxLoss: "6%", maxDailyLoss: "-", leverage: "1:50", timeLimit:
-"UNLIMITED", profitShare: "-", bonus: "-", cost: "-" }, "GAUNTLET FUNDED
-TRADER": { initialBalance: "$50,000", profitTarget: "6%", maxLoss: "6%",
-maxDailyLoss: "3%", leverage: "1:50", timeLimit: "UNLIMITED", profitShare: "UP
-TO 100%", bonus: "-", cost: "$150" } } }, "$100,000": { steps: { "STEP 1": {
-initialBalance: "$100,000", profitTarget: "6%", maxLoss: "6%", maxDailyLoss:
-"-", leverage: "1:50", timeLimit: "UNLIMITED", profitShare: "-", bonus: "5%
-DISCOUNT", cost: "$100" }, "STEP 2": { initialBalance: "$100,000", profitTarget:
-"6%", maxLoss: "6%", maxDailyLoss: "-", leverage: "1:50", timeLimit:
-"UNLIMITED", profitShare: "-", bonus: "-", cost: "-" }, "STEP 3": {
-initialBalance: "$100,000", profitTarget: "6%", maxLoss: "6%", maxDailyLoss:
-"-", leverage: "1:50", timeLimit: "UNLIMITED", profitShare: "-", bonus: "-",
-cost: "-" }, "GAUNTLET FUNDED TRADER": { initialBalance: "$100,000",
-profitTarget: "6%", maxLoss: "6%", maxDailyLoss: "3%", leverage: "1:50",
-timeLimit: "UNLIMITED", profitShare: "UP TO 100%", bonus: "-", cost: "$300" } }
-}, "$300,000": { steps: { "STEP 1": { initialBalance: "$300,000", profitTarget:
-"6%", maxLoss: "6%", maxDailyLoss: "-", leverage: "1:50", timeLimit:
-"UNLIMITED", profitShare: "-", bonus: "5% DISCOUNT", cost: "$250" }, "STEP 2": {
-initialBalance: "$300,000", profitTarget: "6%", maxLoss: "6%", maxDailyLoss:
-"-", leverage: "1:50", timeLimit: "UNLIMITED", profitShare: "-", bonus: "-",
-cost: "-" }, "STEP 3": { initialBalance: "$300,000", profitTarget: "6%",
-maxLoss: "6%", maxDailyLoss: "-", leverage: "1:50", timeLimit: "UNLIMITED",
-profitShare: "-", bonus: "-", cost: "-" }, "GAUNTLET FUNDED TRADER": {
-initialBalance: "$300,000", profitTarget: "6%", maxLoss: "6%", maxDailyLoss:
-"3%", leverage: "1:50", timeLimit: "UNLIMITED", profitShare: "UP TO 100%",
-bonus: "-", cost: "$900" } } } }, Ascendant: { "$10,000": { steps: { "STEP 1": {
-initialBalance: "$10,000", profitTarget: "6%", maxLoss: "6%", maxDailyLoss: "-",
-leverage: "1:50", timeLimit: "UNLIMITED", profitShare: "-", bonus: "5%
-DISCOUNT", cost: "$10" }, "STEP 2": { initialBalance: "$10,000", profitTarget:
-"6%", maxLoss: "6%", maxDailyLoss: "-", leverage: "1:50", timeLimit:
-"UNLIMITED", profitShare: "-", bonus: "-", cost: "-" }, "STEP 3": {
-initialBalance: "$10,000", profitTarget: "6%", maxLoss: "6%", maxDailyLoss: "-",
-leverage: "1:50", timeLimit: "UNLIMITED", profitShare: "-", bonus: "-", cost:
-"-" }, "GAUNTLET FUNDED TRADER": { initialBalance: "$10,000", profitTarget:
-"6%", maxLoss: "6%", maxDailyLoss: "3%", leverage: "1:50", timeLimit:
-"UNLIMITED", profitShare: "UP TO 100%", bonus: "-", cost: "$30" } } },
-"$25,000": { steps: { "STEP 1": { initialBalance: "$25,000", profitTarget: "6%",
-maxLoss: "6%", maxDailyLoss: "-", leverage: "1:50", timeLimit: "UNLIMITED",
-profitShare: "-", bonus: "5% DISCOUNT", cost: "$25" }, "STEP 2": {
-initialBalance: "$25,000", profitTarget: "6%", maxLoss: "6%", maxDailyLoss: "-",
-leverage: "1:50", timeLimit: "UNLIMITED", profitShare: "-", bonus: "-", cost:
-"-" }, "STEP 3": { initialBalance: "$25,000", profitTarget: "6%", maxLoss: "6%",
-maxDailyLoss: "-", leverage: "1:50", timeLimit: "UNLIMITED", profitShare: "-",
-bonus: "-", cost: "-" }, "GAUNTLET FUNDED TRADER": { initialBalance: "$25,000",
-profitTarget: "6%", maxLoss: "6%", maxDailyLoss: "3%", leverage: "1:50",
-timeLimit: "UNLIMITED", profitShare: "UP TO 100%", bonus: "-", cost: "$75" } }
-}, "$50,000": { steps: { "STEP 1": { initialBalance: "$50,000", profitTarget:
-"6%", maxLoss: "6%", maxDailyLoss: "-", leverage: "1:50", timeLimit:
-"UNLIMITED", profitShare: "-", bonus: "5% DISCOUNT", cost: "$50" }, "STEP 2": {
-initialBalance: "$50,000", profitTarget: "6%", maxLoss: "6%", maxDailyLoss: "-",
-leverage: "1:50", timeLimit: "UNLIMITED", profitShare: "-", bonus: "-", cost:
-"-" }, "STEP 3": { initialBalance: "$50,000", profitTarget: "6%", maxLoss: "6%",
-maxDailyLoss: "-", leverage: "1:50", timeLimit: "UNLIMITED", profitShare: "-",
-bonus: "-", cost: "-" }, "GAUNTLET FUNDED TRADER": { initialBalance: "$50,000",
-profitTarget: "6%", maxLoss: "6%", maxDailyLoss: "3%", leverage: "1:50",
-timeLimit: "UNLIMITED", profitShare: "UP TO 100%", bonus: "-", cost: "$150" } }
-} }, Standard: { "$10,000": { steps: { "STEP 1": { initialBalance: "$10,000",
-profitTarget: "6%", maxLoss: "6%", maxDailyLoss: "-", leverage: "1:50",
-timeLimit: "UNLIMITED", profitShare: "-", bonus: "5% DISCOUNT", cost: "$10" },
-"STEP 2": { initialBalance: "$10,000", profitTarget: "6%", maxLoss: "6%",
-maxDailyLoss: "-", leverage: "1:50", timeLimit: "UNLIMITED", profitShare: "-",
-bonus: "-", cost: "-" }, "STEP 3": { initialBalance: "$10,000", profitTarget:
-"6%", maxLoss: "6%", maxDailyLoss: "-", leverage: "1:50", timeLimit:
-"UNLIMITED", profitShare: "-", bonus: "-", cost: "-" }, "GAUNTLET FUNDED
-TRADER": { initialBalance: "$10,000", profitTarget: "6%", maxLoss: "6%",
-maxDailyLoss: "3%", leverage: "1:50", timeLimit: "UNLIMITED", profitShare: "UP
-TO 100%", bonus: "-", cost: "$30" } } }, "$25,000": { steps: { "STEP 1": {
-initialBalance: "$25,000", profitTarget: "6%", maxLoss: "6%", maxDailyLoss: "-",
-leverage: "1:50", timeLimit: "UNLIMITED", profitShare: "-", bonus: "5%
-DISCOUNT", cost: "$25" }, "STEP 2": { initialBalance: "$25,000", profitTarget:
-"6%", maxLoss: "6%", maxDailyLoss: "-", leverage: "1:50", timeLimit:
-"UNLIMITED", profitShare: "-", bonus: "-", cost: "-" }, "STEP 3": {
-initialBalance: "$25,000", profitTarget: "6%", maxLoss: "6%", maxDailyLoss: "-",
-leverage: "1:50", timeLimit: "UNLIMITED", profitShare: "-", bonus: "-", cost:
-"-" }, "GAUNTLET FUNDED TRADER": { initialBalance: "$25,000", profitTarget:
-"6%", maxLoss: "6%", maxDailyLoss: "3%", leverage: "1:50", timeLimit:
-"UNLIMITED", profitShare: "UP TO 100%", bonus: "-", cost: "$75" } } },
-"$50,000": { steps: { "STEP 1": { initialBalance: "$50,000", profitTarget: "6%",
-maxLoss: "6%", maxDailyLoss: "-", leverage: "1:50", timeLimit: "UNLIMITED",
-profitShare: "-", bonus: "5% DISCOUNT", cost: "$50" }, "STEP 2": {
-initialBalance: "$50,000", profitTarget: "6%", maxLoss: "6%", maxDailyLoss: "-",
-leverage: "1:50", timeLimit: "UNLIMITED", profitShare: "-", bonus: "-", cost:
-"-" }, "STEP 3": { initialBalance: "$50,000", profitTarget: "6%", maxLoss: "6%",
-maxDailyLoss: "-", leverage: "1:50", timeLimit: "UNLIMITED", profitShare: "-",
-bonus: "-", cost: "-" }, "GAUNTLET FUNDED TRADER": { initialBalance: "$50,000",
-profitTarget: "6%", maxLoss: "6%", maxDailyLoss: "3%", leverage: "1:50",
-timeLimit: "UNLIMITED", profitShare: "UP TO 100%", bonus: "-", cost: "$150" } }
-}, "$100,000": { steps: { "STEP 1": { initialBalance: "$100,000", profitTarget:
-"6%", maxLoss: "6%", maxDailyLoss: "-", leverage: "1:50", timeLimit:
-"UNLIMITED", profitShare: "-", bonus: "5% DISCOUNT", cost: "$100" }, "STEP 2": {
-initialBalance: "$100,000", profitTarget: "6%", maxLoss: "6%", maxDailyLoss:
-"-", leverage: "1:50", timeLimit: "UNLIMITED", profitShare: "-", bonus: "-",
-cost: "-" }, "STEP 3": { initialBalance: "$100,000", profitTarget: "6%",
-maxLoss: "6%", maxDailyLoss: "-", leverage: "1:50", timeLimit: "UNLIMITED",
-profitShare: "-", bonus: "-", cost: "-" }, "GAUNTLET FUNDED TRADER": {
-initialBalance: "$100,000", profitTarget: "6%", maxLoss: "6%", maxDailyLoss:
-"3%", leverage: "1:50", timeLimit: "UNLIMITED", profitShare: "UP TO 100%",
-bonus: "-", cost: "$300" } } } } }; /* Add these styles */ .metrics-container {
-opacity: 0; transform: translateY(20px); animation: fadeIn 0.3s ease forwards; }
-@keyframes fadeIn { to { opacity: 1; transform: translateY(0); } } /* Highlight
-changes between steps */ .metrics-table td { transition: background-color 0.3s
-ease; } .metrics-table td.highlight { background-color: rgba(247, 200, 67, 0.1);
-animation: pulse 1s ease; } @keyframes pulse { 0% { background-color: rgba(247,
-200, 67, 0.3); } 100% { background-color: rgba(247, 200, 67, 0.1); } }
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Checkout</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #121212;
+        color: #ffffff;
+      }
+
+      .checkout-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #1e1e1e;
+        border-radius: 10px;
+      }
+
+      .checkout-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+      }
+
+      .order-preview,
+      .your-info {
+        background-color: #1e1e1e;
+        padding: 20px;
+        border-radius: 10px;
+      }
+
+      .button-group {
+        display: flex;
+        gap: 10px;
+      }
+
+      .button-group button {
+        flex: 1;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        background-color: #2d2d2d;
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      .button-group button.active,
+      .button-group button.selected {
+        background-color: #f7c843;
+        color: #121212;
+      }
+
+      .amount-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 10px;
+      }
+
+      .amount-grid button {
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        background-color: #2d2d2d;
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      .amount-grid button.active,
+      .amount-grid button.selected {
+        background-color: #f7c843;
+        color: #121212;
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-bottom: 25px;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 15px;
+      }
+
+      .form-group label {
+        font-weight: bold;
+        color: #f7c843;
+      }
+
+      .form-group input,
+      .form-group select {
+        padding: 10px;
+        border: 1px solid #444;
+        border-radius: 5px;
+        background-color: #2d2d2d;
+        color: #ffffff;
+        width: 100%;
+      }
+
+      .info-icon {
+        color: #f7c843;
+        font-size: 0.8em;
+        cursor: help;
+      }
+
+      .terms-group {
+        margin: 30px 0;
+      }
+
+      .terms-group a {
+        color: #f7c843;
+        text-decoration: none;
+      }
+
+      .payment-due {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 20px 0;
+      }
+
+      .total-amount {
+        font-size: 1.5em;
+        font-weight: bold;
+      }
+
+      .checkout-button {
+        background-color: #f7c843;
+        color: #121212;
+        padding: 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        width: 100%;
+        margin-top: 20px;
+        transition: background-color 0.3s;
+      }
+
+      .checkout-button:hover {
+        background-color: #d1a736;
+      }
+
+      .graph {
+        margin-top: 20px;
+        padding: 20px;
+        background: #2a2a2a;
+        border-radius: 8px;
+        text-align: center;
+      }
+
+      .challenge-type-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        margin-top: 15px;
+      }
+
+      .challenge-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        padding: 15px;
+        background: #2d2d2d;
+        border: 2px solid transparent;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .challenge-card img {
+        width: 100%;
+        height: 120px;
+        object-fit: contain;
+        border-radius: 8px;
+      }
+
+      .challenge-card span {
+        font-weight: bold;
+        color: #ffffff;
+      }
+
+      .challenge-card:hover {
+        background: #363636;
+        transform: translateY(-2px);
+      }
+
+      .challenge-card.selected {
+        border-color: #f7c843;
+        background: #363636;
+      }
+
+      .phone-input-group {
+        display: grid;
+        grid-template-columns: 100px 1fr;
+        gap: 10px;
+        margin-bottom: 25px;
+      }
+
+      .phone-input-group select {
+        padding: 10px;
+        border: 1px solid #444;
+        border-radius: 5px;
+        background-color: #2d2d2d;
+        color: #ffffff;
+        height: 100%;
+      }
+
+      @media (max-width: 768px) {
+        .checkout-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .form-row {
+          grid-template-columns: 1fr;
+        }
+
+        .challenge-type-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .metrics-container {
+        max-width: 100%;
+        overflow-x: auto;
+      }
+
+      @media (max-width: 768px) {
+        .metrics-container {
+          position: relative;
+        }
+
+        .metrics-container::before {
+          content: "⟺";
+          position: absolute;
+          top: 50%;
+          right: 10px;
+          transform: translateY(-50%);
+          color: #f7c843;
+          font-size: 24px;
+          animation: swipeHint 1.5s ease-in-out infinite;
+          z-index: 2;
+          opacity: 0.8;
+        }
+
+        @keyframes swipeHint {
+          0%,
+          100% {
+            transform: translateY(-50%) translateX(0);
+          }
+          50% {
+            transform: translateY(-50%) translateX(-10px);
+          }
+        }
+
+        .metrics-container.scrolled::before {
+          display: none;
+        }
+      }
+
+      .metrics-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        background: #1e1e1e;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .metrics-table th,
+      .metrics-table td {
+        padding: 15px;
+        text-align: center;
+        border-bottom: 1px solid #333;
+      }
+
+      .metrics-table th {
+        background: #2d2d2d;
+        color: #f7c843;
+        font-weight: bold;
+      }
+
+      .metrics-row-header {
+        color: #f7c843;
+        text-align: left;
+        font-weight: bold;
+      }
+
+      .metrics-table td {
+        transition: background-color 0.3s ease;
+      }
+
+      .metrics-table td.highlight {
+        background-color: rgba(247, 200, 67, 0.1);
+        animation: pulse 1s ease;
+      }
+
+      @keyframes pulse {
+        0% {
+          background-color: rgba(247, 200, 67, 0.3);
+        }
+        100% {
+          background-color: rgba(247, 200, 67, 0.1);
+        }
+      }
+
+      .benefits-section {
+        padding: 15px;
+        background: transparent;
+        border-radius: 10px;
+        margin: 15px 0;
+        max-width: 450px;
+      }
+
+      .benefits-section h3 {
+        font-size: 1.1em;
+        margin-bottom: 12px;
+        color: #f7c843;
+      }
+
+      .benefits-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+
+      .benefit-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        padding: 10px;
+        background: #2d2d2d;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .benefit-item:hover {
+        background: #363636;
+        transform: translateY(-2px);
+      }
+
+      .benefit-icon {
+        font-size: 1.1em;
+        color: #f7c843;
+      }
+
+      .benefit-item h4 {
+        font-size: 0.85em;
+        font-weight: bold;
+        color: #ffffff;
+        margin: 0;
+      }
+
+      .benefit-item p {
+        color: #999;
+        font-size: 0.75em;
+        margin: 0;
+        text-align: center;
+      }
+
+      @media (max-width: 768px) {
+        .metrics-container {
+          max-width: 100%;
+          overflow-x: auto;
+        }
+
+        .metrics-table {
+          font-size: 0.8em;
+        }
+
+        .metrics-table th,
+        .metrics-table td {
+          padding: 8px 4px;
+          white-space: nowrap;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .metrics-table {
+          font-size: 0.7em;
+        }
+
+        .metrics-table th,
+        .metrics-table td {
+          padding: 6px 3px;
+        }
+      }
+
+      .payment-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .payment-modal.active {
+        display: flex;
+      }
+
+      .modal-content {
+        background: #1e1e1e;
+        padding: 30px;
+        border-radius: 10px;
+        max-width: 500px;
+        width: 90%;
+      }
+
+      .payment-options {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-top: 20px;
+        margin-bottom: 15px;
+      }
+
+      .redirect-notice {
+        text-align: center;
+        color: #999;
+        font-size: 0.9em;
+        margin-top: 20px;
+        padding: 0 15px;
+      }
+
+      .payment-option {
+        background: #2d2d2d;
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .payment-option:hover {
+        background: #363636;
+        transform: translateY(-2px);
+      }
+
+      .payment-option img {
+        height: 40px;
+        margin-bottom: 10px;
+      }
+
+      .close-modal {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        color: #fff;
+        cursor: pointer;
+        font-size: 24px;
+      }
+
+      .selected-amount {
+        text-align: center;
+        color: #f7c843;
+        font-size: 1.2em;
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="checkout-container">
+      <div class="checkout-grid">
+        <!-- Left Column -->
+        <div class="order-preview">
+          <h2>Order Preview</h2>
+
+          <div class="challenge-type">
+            <h3>Challenge Type <span class="info-icon">ⓘ</span></h3>
+            <div class="challenge-type-grid">
+              <button class="challenge-card" data-type="Gauntlet">
+                <img
+                  src="https://images.squarespace-cdn.com/content/676f1b6f4797230745644c91/88fe01a8-c2a8-41a4-a3da-918187a50baf/40.png"
+                  alt="Gauntlet"
+                />
+                <span>Gauntlet</span>
+              </button>
+              <button class="challenge-card" data-type="Ascendant">
+                <img
+                  src="https://images.squarespace-cdn.com/content/676f1b6f4797230745644c91/d5c446e5-e1b3-4072-bb2d-2b1976b9cd28/39.png"
+                  alt="Ascendant"
+                />
+                <span>Ascendant</span>
+              </button>
+              <button class="challenge-card" data-type="Standard">
+                <img
+                  src="https://images.squarespace-cdn.com/content/676f1b6f4797230745644c91/d5772431-ab44-4e05-9e4b-462d0a481f71/41.png"
+                  alt="Standard"
+                />
+                <span>Standard</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="challenge-amount">
+            <h3>Choose Challenge Amount <span class="info-icon">ⓘ</span></h3>
+            <div class="amount-grid challenge-options">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <div class="platform-select">
+            <h3>Select Platform <span class="info-icon">ⓘ</span></h3>
+            <div class="button-group platform-buttons">
+              <button>Metatrader 4</button>
+              <button>Metatrader 5</button>
+            </div>
+          </div>
+
+          <div class="benefits-section">
+            <h3>Why Choose Us</h3>
+            <div class="benefits-grid">
+              <div class="benefit-item">
+                <span class="benefit-icon">⚡</span>
+                <h4>Instant Funding</h4>
+                <p>Get funded after passing</p>
+              </div>
+              <div class="benefit-item">
+                <span class="benefit-icon">📊</span>
+                <h4>Flexible Trading</h4>
+                <p>Trade your style</p>
+              </div>
+              <div class="benefit-item">
+                <span class="benefit-icon">💸</span>
+                <h4>Weekly Payouts</h4>
+                <p>Fast profit withdrawals</p>
+              </div>
+              <div class="benefit-item">
+                <span class="benefit-icon">🌐</span>
+                <h4>24/7 Support</h4>
+                <p>Always here to help</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="your-info">
+          <h2>Your Info</h2>
+          <form class="checkout-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="firstName">First Name</label>
+                <input type="text" id="firstName" required />
+              </div>
+              <div class="form-group">
+                <label for="lastName">Last Name</label>
+                <input type="text" id="lastName" required />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" required />
+              </div>
+              <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required />
+              </div>
+            </div>
+
+            <div class="phone-input-group">
+              <div class="form-group">
+                <label for="countryCode">Code</label>
+                <select id="countryCode" required>
+                  <option value="+1">+1</option>
+                  <option value="+44">+44</option>
+                  <option value="+61">+61</option>
+                  <option value="+33">+33</option>
+                  <option value="+49">+49</option>
+                  <!-- Add more country codes as needed -->
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input
+                  type="tel"
+                  id="phone"
+                  required
+                  placeholder="(555) 555-5555"
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="country">Country</label>
+              <select id="country" required>
+                <option value="Canada">Canada</option>
+                <option value="United States">United States</option>
+                <option value="United Kingdom">United Kingdom</option>
+              </select>
+            </div>
+
+            <div class="terms-group">
+              <label>
+                <input type="checkbox" required />
+                I confirm that I am 18 years or older and agree to the
+                <a href="#">Terms and Conditions</a>,
+                <a href="#">Privacy Notice</a> and
+                <a href="#">Cookies Notice</a>
+              </label>
+            </div>
+
+            <div class="payment-due">
+              <h3>Payment Due</h3>
+              <span class="total-amount price">$0.00</span>
+            </div>
+
+            <button type="submit" class="checkout-button">
+              Proceed to Payment
+            </button>
+
+            <p class="disclaimer">
+              By proceeding to payment, I agree that my full name & country of
+              residence matches those on my government-issued documents
+            </p>
+          </form>
+        </div>
+      </div>
+
+      <div class="graph">
+        <p>Performance metrics will appear here based on your selection</p>
+      </div>
+    </div>
+
+    <div class="payment-modal">
+      <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2>Choose Payment Method</h2>
+        <div class="selected-amount"></div>
+        <div class="payment-options">
+          <div class="payment-option" data-gateway="stripe">
+            <img src="/images/stripe-logo.png" alt="Stripe" />
+            <p>Pay with Stripe</p>
+          </div>
+          <div class="payment-option" data-gateway="paypal">
+            <img src="/images/paypal-logo.png" alt="PayPal" />
+            <p>Pay with PayPal</p>
+          </div>
+          <div class="payment-option" data-gateway="crypto">
+            <img src="/images/crypto-logo.png" alt="Cryptocurrency" />
+            <p>Pay with Crypto</p>
+          </div>
+          <div class="payment-option" data-gateway="wise">
+            <img src="/images/wise-logo.png" alt="Wise" />
+            <p>Pay with Wise</p>
+          </div>
+        </div>
+        <p class="redirect-notice">
+          You'll be securely redirected to complete your purchase and
+          automatically returned once completed.
+        </p>
+      </div>
+    </div>
+
+    <script>
+      // First initialization (correct)
+      const STRIPE_PUBLISHABLE_KEY =
+        "pk_test_51QdJixL4B5nMP2dUioaYHDro55h9J7EPmZKoRFni3hTBSwbvWib4tzG1ooj4U2K4Q55d0vYWxOJeW1VYcgiXkbhn002OwUni9Y";
+      const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+
+      document.addEventListener("DOMContentLoaded", () => {
+        // Add this function first
+        function updateMetricsTable(selectedType, selectedAmount) {
+          const metrics = performanceMetrics[selectedType][selectedAmount];
+          const steps = metrics.steps;
+
+          // Create table headers
+          const headers = Object.keys(steps);
+
+          // Get all possible row metrics from the first step
+          const rowMetrics = Object.keys(Object.values(steps)[0]);
+
+          // Create table HTML
+          let tableHTML = `
+            <div class="metrics-container">
+              <table class="metrics-table">
+                <tr>
+                  <th></th>
+                  ${headers.map((header) => `<th>${header}</th>`).join("")}
+                </tr>
+                ${rowMetrics
+                  .map(
+                    (metric) => `
+                  <tr>
+                    <td class="metrics-row-header">${metric}</td>
+                    ${headers
+                      .map(
+                        (step) => `
+                      <td>${steps[step][metric]}</td>
+                    `
+                      )
+                      .join("")}
+                  </tr>
+                `
+                  )
+                  .join("")}
+              </table>
+            </div>
+          `;
+
+          // Update the graph container with the new table
+          const graphContainer = document.querySelector(".graph");
+          graphContainer.innerHTML = tableHTML;
+
+          // Highlight changes between steps
+          highlightChanges(selectedType, selectedAmount);
+        }
+
+        // Move performanceMetrics here, before it's used
+        const performanceMetrics = {
+          Gauntlet: {
+            "$50,000": {
+              steps: {
+                "STEP 1": {
+                  initialBalance: "$50,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "-",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "-",
+                  bonus: "5% DISCOUNT",
+                  cost: "$50",
+                },
+                "STEP 2": {
+                  initialBalance: "$50,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "-",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "-",
+                  bonus: "-",
+                  cost: "-",
+                },
+                "STEP 3": {
+                  initialBalance: "$50,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "-",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "-",
+                  bonus: "-",
+                  cost: "-",
+                },
+                "GAUNTLET FUNDED TRADER": {
+                  initialBalance: "$50,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "3%",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "UP TO 100%",
+                  bonus: "-",
+                  cost: "$150",
+                },
+              },
+            },
+            "$100,000": {
+              steps: {
+                "STEP 1": {
+                  initialBalance: "$100,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "-",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "-",
+                  bonus: "5% DISCOUNT",
+                  cost: "$100",
+                },
+                "STEP 2": {
+                  initialBalance: "$100,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "-",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "-",
+                  bonus: "-",
+                  cost: "-",
+                },
+                "STEP 3": {
+                  initialBalance: "$100,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "-",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "-",
+                  bonus: "-",
+                  cost: "-",
+                },
+                "GAUNTLET FUNDED TRADER": {
+                  initialBalance: "$100,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "3%",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "UP TO 100%",
+                  bonus: "-",
+                  cost: "$300",
+                },
+              },
+            },
+            "$300,000": {
+              steps: {
+                "STEP 1": {
+                  initialBalance: "$300,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "-",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "-",
+                  bonus: "5% DISCOUNT",
+                  cost: "$250",
+                },
+                "STEP 2": {
+                  initialBalance: "$300,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "-",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "-",
+                  bonus: "-",
+                  cost: "-",
+                },
+                "STEP 3": {
+                  initialBalance: "$300,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "-",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "-",
+                  bonus: "-",
+                  cost: "-",
+                },
+                "GAUNTLET FUNDED TRADER": {
+                  initialBalance: "$300,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "3%",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "UP TO 100%",
+                  bonus: "-",
+                  cost: "$900",
+                },
+              },
+            },
+          },
+          Ascendant: {
+            "$10,000": {
+              steps: {
+                "STEP 1": {
+                  initialBalance: "$10,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "-",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "-",
+                  bonus: "5% DISCOUNT",
+                  cost: "$10",
+                },
+                "STEP 2": {
+                  initialBalance: "$10,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "-",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "-",
+                  bonus: "-",
+                  cost: "-",
+                },
+                "STEP 3": {
+                  initialBalance: "$10,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "-",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "-",
+                  bonus: "-",
+                  cost: "-",
+                },
+                "GAUNTLET FUNDED TRADER": {
+                  initialBalance: "$10,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "3%",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "UP TO 100%",
+                  bonus: "-",
+                  cost: "$30",
+                },
+              },
+            },
+            "$25,000": {
+              steps: {
+                "STEP 1": {
+                  initialBalance: "$25,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "-",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "-",
+                  bonus: "5% DISCOUNT",
+                  cost: "$25",
+                },
+                "STEP 2": {
+                  initialBalance: "$25,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "-",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "-",
+                  bonus: "-",
+                  cost: "-",
+                },
+                "STEP 3": {
+                  initialBalance: "$25,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "-",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "-",
+                  bonus: "-",
+                  cost: "-",
+                },
+                "GAUNTLET FUNDED TRADER": {
+                  initialBalance: "$25,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "3%",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "UP TO 100%",
+                  bonus: "-",
+                  cost: "$75",
+                },
+              },
+            },
+            "$50,000": {
+              steps: {
+                "STEP 1": {
+                  initialBalance: "$50,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "-",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "-",
+                  bonus: "5% DISCOUNT",
+                  cost: "$50",
+                },
+                "STEP 2": {
+                  initialBalance: "$50,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "-",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "-",
+                  bonus: "-",
+                  cost: "-",
+                },
+                "STEP 3": {
+                  initialBalance: "$50,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "-",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "-",
+                  bonus: "-",
+                  cost: "-",
+                },
+                "GAUNTLET FUNDED TRADER": {
+                  initialBalance: "$50,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "3%",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "UP TO 100%",
+                  bonus: "-",
+                  cost: "$150",
+                },
+              },
+            },
+          },
+          Standard: {
+            "$10,000": {
+              steps: {
+                "STEP 1": {
+                  initialBalance: "$10,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "-",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "-",
+                  bonus: "5% DISCOUNT",
+                  cost: "$10",
+                },
+                "STEP 2": {
+                  initialBalance: "$10,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "-",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "-",
+                  bonus: "-",
+                  cost: "-",
+                },
+                "STEP 3": {
+                  initialBalance: "$10,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "-",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "-",
+                  bonus: "-",
+                  cost: "-",
+                },
+                "GAUNTLET FUNDED TRADER": {
+                  initialBalance: "$10,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "3%",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "UP TO 100%",
+                  bonus: "-",
+                  cost: "$30",
+                },
+              },
+            },
+            "$25,000": {
+              steps: {
+                "STEP 1": {
+                  initialBalance: "$25,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "-",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "-",
+                  bonus: "5% DISCOUNT",
+                  cost: "$25",
+                },
+                "STEP 2": {
+                  initialBalance: "$25,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "-",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "-",
+                  bonus: "-",
+                  cost: "-",
+                },
+                "STEP 3": {
+                  initialBalance: "$25,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "-",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "-",
+                  bonus: "-",
+                  cost: "-",
+                },
+                "GAUNTLET FUNDED TRADER": {
+                  initialBalance: "$25,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "3%",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "UP TO 100%",
+                  bonus: "-",
+                  cost: "$75",
+                },
+              },
+            },
+            "$50,000": {
+              steps: {
+                "STEP 1": {
+                  initialBalance: "$50,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "-",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "-",
+                  bonus: "5% DISCOUNT",
+                  cost: "$50",
+                },
+                "STEP 2": {
+                  initialBalance: "$50,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "-",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "-",
+                  bonus: "-",
+                  cost: "-",
+                },
+                "STEP 3": {
+                  initialBalance: "$50,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "-",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "-",
+                  bonus: "-",
+                  cost: "-",
+                },
+                "GAUNTLET FUNDED TRADER": {
+                  initialBalance: "$50,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "3%",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "UP TO 100%",
+                  bonus: "-",
+                  cost: "$150",
+                },
+              },
+            },
+            "$100,000": {
+              steps: {
+                "STEP 1": {
+                  initialBalance: "$100,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "-",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "-",
+                  bonus: "5% DISCOUNT",
+                  cost: "$100",
+                },
+                "STEP 2": {
+                  initialBalance: "$100,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "-",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "-",
+                  bonus: "-",
+                  cost: "-",
+                },
+                "STEP 3": {
+                  initialBalance: "$100,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "-",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "-",
+                  bonus: "-",
+                  cost: "-",
+                },
+                "GAUNTLET FUNDED TRADER": {
+                  initialBalance: "$100,000",
+                  profitTarget: "6%",
+                  maxLoss: "6%",
+                  maxDailyLoss: "3%",
+                  leverage: "1:50",
+                  timeLimit: "UNLIMITED",
+                  profitShare: "UP TO 100%",
+                  bonus: "-",
+                  cost: "$300",
+                },
+              },
+            },
+          },
+        };
+
+        const challengeOptions = {
+          Gauntlet: ["$50,000", "$100,000", "$300,000"],
+          Ascendant: ["$10,000", "$25,000", "$50,000"],
+          Standard: ["$10,000", "$25,000", "$50,000", "$100,000"],
+        };
+
+        const prices = {
+          Gauntlet: { "$50,000": 50, "$100,000": 100, "$300,000": 250 },
+          Ascendant: { "$10,000": 250, "$25,000": 500, "$50,000": 1000 },
+          Standard: {
+            "$10,000": 100,
+            "$25,000": 200,
+            "$50,000": 300,
+            "$100,000": 450,
+          },
+        };
+
+        const images = {
+          Gauntlet:
+            "https://images.squarespace-cdn.com/content/676f1b6f4797230745644c91/88fe01a8-c2a8-41a4-a3da-918187a50baf/40.png",
+          Ascendant:
+            "https://images.squarespace-cdn.com/content/676f1b6f4797230745644c91/d5c446e5-e1b3-4072-bb2d-2b1976b9cd28/39.png",
+          Standard:
+            "https://images.squarespace-cdn.com/content/676f1b6f4797230745644c91/d5772431-ab44-4e05-9e4b-462d0a481f71/41.png",
+        };
+
+        let selectedPrice = 0;
+        const priceDisplay = document.querySelector(".price");
+        const challengeOptionsContainer =
+          document.querySelector(".challenge-options");
+        const platformButtons = document.querySelectorAll(
+          ".platform-buttons button"
+        );
+        const graphContainer = document.querySelector(".graph");
+
+        // Challenge Type Selection
+        const challengeCards = document.querySelectorAll(".challenge-card");
+        challengeCards.forEach((card) => {
+          card.addEventListener("click", () => {
+            // Remove selected class from all cards
+            challengeCards.forEach((c) => c.classList.remove("selected"));
+            // Add selected class to clicked card
+            card.classList.add("selected");
+
+            const selectedType = card.dataset.type;
+            const amounts = challengeOptions[selectedType];
+
+            // Update challenge options
+            challengeOptionsContainer.innerHTML = amounts
+              .map(
+                (amount) => `
+                  <button class="challenge-option" data-amount="${amount}">${amount}</button>
+                `
+              )
+              .join("");
+
+            // Clear the price display when changing challenge type
+            priceDisplay.textContent = "$0.00";
+          });
+        });
+
+        // Challenge Amount Selection
+        challengeOptionsContainer.addEventListener("click", (e) => {
+          if (e.target.classList.contains("challenge-option")) {
+            // Remove selected class from all options
+            document.querySelectorAll(".challenge-option").forEach((opt) => {
+              opt.classList.remove("selected");
+            });
+
+            // Add selected class to clicked option
+            e.target.classList.add("selected");
+
+            // Update price display
+            const selectedType = document.querySelector(
+              ".challenge-card.selected"
+            ).dataset.type;
+            const selectedAmount = e.target.dataset.amount;
+            const price = prices[selectedType][selectedAmount];
+            priceDisplay.textContent = `$${price}`;
+            selectedPrice = price;
+
+            // Update performance metrics
+            if (
+              performanceMetrics[selectedType] &&
+              performanceMetrics[selectedType][selectedAmount]
+            ) {
+              updateMetricsTable(selectedType, selectedAmount);
+            }
+          }
+        });
+
+        // Platform Selection
+        platformButtons.forEach((button) => {
+          button.addEventListener("click", () => {
+            platformButtons.forEach((btn) => btn.classList.remove("selected"));
+            button.classList.add("selected");
+          });
+        });
+
+        // Form Submission
+        document
+          .querySelector(".checkout-button")
+          .addEventListener("click", (e) => {
+            e.preventDefault();
+            const selectedType = document.querySelector(
+              ".challenge-card.selected"
+            )?.dataset.type;
+            const selectedAmount = document.querySelector(
+              ".challenge-option.selected"
+            )?.dataset.amount;
+
+            if (!selectedType || !selectedAmount) {
+              alert("Please select a challenge type and amount first");
+              return;
+            }
+
+            const price = prices[selectedType][selectedAmount];
+            const modal = document.querySelector(".payment-modal");
+            const selectedAmountDiv = modal.querySelector(".selected-amount");
+            selectedAmountDiv.textContent = `Selected: ${selectedType} ${selectedAmount} - $${price}`;
+            modal.classList.add("active");
+          });
+      });
+
+      function collectFormData() {
+        return {
+          // Personal Info
+          firstName: document.getElementById("firstName").value,
+          lastName: document.getElementById("lastName").value,
+          email: document.getElementById("email").value,
+          phone: document.getElementById("phone").value,
+          country: document.getElementById("country").value,
+
+          // Order Info
+          challengeType: document.querySelector(".challenge-card.selected")
+            ?.dataset.type,
+          challengeAmount: document.querySelector(".challenge-option.selected")
+            ?.dataset.amount,
+          platform: document.querySelector(".platform-buttons button.selected")
+            ?.textContent,
+          totalPrice: selectedPrice,
+
+          // Combine first and last name for Stripe
+          fullName: `${document.getElementById("firstName").value} ${
+            document.getElementById("lastName").value
+          }`,
+
+          // Terms acceptance
+          termsAccepted: document.getElementById("terms").checked,
+        };
+      }
+
+      function highlightChanges(selectedType, selectedAmount) {
+        const steps = performanceMetrics[selectedType][selectedAmount].steps;
+        const cells = document.querySelectorAll(
+          ".metrics-table td:not(.metrics-row-header)"
+        );
+
+        cells.forEach((cell, index) => {
+          const row = Math.floor(index / 4); // 4 columns (steps)
+          const col = index % 4;
+          const currentStep = Object.values(steps)[col];
+          const nextStep = Object.values(steps)[col + 1];
+
+          if (
+            nextStep &&
+            cell.textContent !== nextStep[Object.keys(currentStep)[row]]
+          ) {
+            cell.classList.add("highlight");
+          } else {
+            cell.classList.remove("highlight");
+          }
+        });
+      }
+
+      const paymentLinks = {
+        Gauntlet: {
+          "$50,000":
+            "https://buy.stripe.com/your_payment_link_for_gauntlet_50k",
+          "$100,000":
+            "https://buy.stripe.com/your_payment_link_for_gauntlet_100k",
+          "$300,000":
+            "https://buy.stripe.com/your_payment_link_for_gauntlet_300k",
+        },
+        Ascendant: {
+          "$10,000":
+            "https://buy.stripe.com/your_payment_link_for_ascendant_10k",
+          "$25,000":
+            "https://buy.stripe.com/your_payment_link_for_ascendant_25k",
+          "$50,000":
+            "https://buy.stripe.com/your_payment_link_for_ascendant_50k",
+        },
+        Standard: {
+          "$10,000":
+            "https://buy.stripe.com/your_payment_link_for_standard_10k",
+          "$25,000":
+            "https://buy.stripe.com/your_payment_link_for_standard_25k",
+          "$50,000":
+            "https://buy.stripe.com/your_payment_link_for_standard_50k",
+          "$100,000":
+            "https://buy.stripe.com/your_payment_link_for_standard_100k",
+        },
+      };
+
+      const paymentGateways = {
+        stripe: {
+          Gauntlet: {
+            "$50,000": "https://buy.stripe.com/live/gauntlet_50k_stripe",
+            "$100,000": "https://buy.stripe.com/live/gauntlet_100k_stripe",
+            "$300,000": "https://buy.stripe.com/live/gauntlet_300k_stripe",
+          },
+          Ascendant: {
+            "$10,000": "https://buy.stripe.com/ascendant_10k_stripe",
+            "$25,000": "https://buy.stripe.com/ascendant_25k_stripe",
+            "$50,000": "https://buy.stripe.com/ascendant_50k_stripe",
+          },
+          Standard: {
+            "$10,000": "https://buy.stripe.com/standard_10k_stripe",
+            "$25,000": "https://buy.stripe.com/standard_25k_stripe",
+            "$50,000": "https://buy.stripe.com/standard_50k_stripe",
+            "$100,000": "https://buy.stripe.com/standard_100k_stripe",
+          },
+        },
+        paypal: {
+          Gauntlet: {
+            "$50,000": "https://paypal.com/gauntlet_50k_link",
+            "$100,000": "https://paypal.com/gauntlet_100k_link",
+            "$300,000": "https://paypal.com/gauntlet_300k_link",
+          },
+          Ascendant: {
+            "$10,000": "https://paypal.com/ascendant_10k_link",
+            "$25,000": "https://paypal.com/ascendant_25k_link",
+            "$50,000": "https://paypal.com/ascendant_50k_link",
+          },
+          Standard: {
+            "$10,000": "https://paypal.com/standard_10k_link",
+            "$25,000": "https://paypal.com/standard_25k_link",
+            "$50,000": "https://paypal.com/standard_50k_link",
+            "$100,000": "https://paypal.com/standard_100k_link",
+          },
+        },
+        crypto: {
+          Gauntlet: {
+            "$50,000": "https://crypto-gateway.com/gauntlet_50k",
+            "$100,000": "https://crypto-gateway.com/gauntlet_100k",
+            "$300,000": "https://crypto-gateway.com/gauntlet_300k",
+          },
+          Ascendant: {
+            "$10,000": "https://crypto-gateway.com/ascendant_10k",
+            "$25,000": "https://crypto-gateway.com/ascendant_25k",
+            "$50,000": "https://crypto-gateway.com/ascendant_50k",
+          },
+          Standard: {
+            "$10,000": "https://crypto-gateway.com/standard_10k",
+            "$25,000": "https://crypto-gateway.com/standard_25k",
+            "$50,000": "https://crypto-gateway.com/standard_50k",
+            "$100,000": "https://crypto-gateway.com/standard_100k",
+          },
+        },
+        wise: {
+          Gauntlet: {
+            "$50,000": "https://wise.com/gauntlet_50k",
+            "$100,000": "https://wise.com/gauntlet_100k",
+            "$300,000": "https://wise.com/gauntlet_300k",
+          },
+          Ascendant: {
+            "$10,000": "https://wise.com/ascendant_10k",
+            "$25,000": "https://wise.com/ascendant_25k",
+            "$50,000": "https://wise.com/ascendant_50k",
+          },
+          Standard: {
+            "$10,000": "https://wise.com/standard_10k",
+            "$25,000": "https://wise.com/standard_25k",
+            "$50,000": "https://wise.com/standard_50k",
+            "$100,000": "https://wise.com/standard_100k",
+          },
+        },
+      };
+
+      document
+        .querySelector(".checkout-button")
+        .addEventListener("click", (e) => {
+          e.preventDefault();
+          const selectedType = document.querySelector(
+            ".challenge-card.selected"
+          )?.dataset.type;
+          const selectedAmount = document.querySelector(
+            ".challenge-option.selected"
+          )?.dataset.amount;
+
+          if (!selectedType || !selectedAmount) {
+            alert("Please select a challenge type and amount first");
+            return;
+          }
+
+          const price = prices[selectedType][selectedAmount];
+
+          const modal = document.querySelector(".payment-modal");
+          const selectedAmountDiv = modal.querySelector(".selected-amount");
+          selectedAmountDiv.textContent = `Selected: ${selectedType} ${selectedAmount} - $${price}`;
+          modal.classList.add("active");
+        });
+
+      document.querySelectorAll(".payment-option").forEach((option) => {
+        option.addEventListener("click", () => {
+          // Collect all form data
+          const formData = {
+            firstName: document.getElementById("firstName").value,
+            lastName: document.getElementById("lastName").value,
+            email: document.getElementById("email").value,
+            phone: document.getElementById("phone").value,
+            countryCode: document.getElementById("countryCode").value,
+            country: document.getElementById("country").value,
+            platform: document.querySelector(
+              ".platform-buttons button.selected"
+            )?.textContent,
+            challengeType: document.querySelector(".challenge-card.selected")
+              .dataset.type,
+            challengeAmount: document.querySelector(
+              ".challenge-option.selected"
+            ).dataset.amount,
+          };
+
+          // Validate form data
+          if (
+            !formData.firstName ||
+            !formData.lastName ||
+            !formData.email ||
+            !formData.phone ||
+            !formData.platform
+          ) {
+            alert("Please fill in all required fields");
+            return;
+          }
+
+          // Add form data as URL parameters
+          const gateway = option.dataset.gateway;
+          let paymentLink =
+            paymentGateways[gateway][formData.challengeType][
+              formData.challengeAmount
+            ];
+
+          // Append form data to payment link
+          const params = new URLSearchParams({
+            customer_name: `${formData.firstName} ${formData.lastName}`,
+            customer_email: formData.email,
+            customer_phone: `${formData.countryCode}${formData.phone}`,
+            customer_country: formData.country,
+            platform: formData.platform,
+            challenge_type: formData.challengeType,
+            challenge_amount: formData.challengeAmount,
+          });
+
+          paymentLink = `${paymentLink}?${params.toString()}`;
+          window.location.href = paymentLink;
+        });
+      });
+
+      document.querySelector(".close-modal").addEventListener("click", () => {
+        document.querySelector(".payment-modal").classList.remove("active");
+      });
+
+      document
+        .querySelector(".payment-modal")
+        .addEventListener("click", (e) => {
+          if (e.target === e.currentTarget) {
+            e.target.classList.remove("active");
+          }
+        });
+
+      // Add this function for form validation
+      function validateForm() {
+        const requiredFields = {
+          firstName: "First Name",
+          lastName: "Last Name",
+          email: "Email",
+          phone: "Phone Number",
+          platform: "Trading Platform",
+        };
+
+        let isValid = true;
+        let errorMessage = "Please fill in the following fields:\n";
+
+        for (const [field, label] of Object.entries(requiredFields)) {
+          const element = document.getElementById(field);
+          if (!element || !element.value.trim()) {
+            errorMessage += `- ${label}\n`;
+            isValid = false;
+          }
+        }
+
+        // Check if platform is selected
+        if (!document.querySelector(".platform-buttons button.selected")) {
+          errorMessage += "- Select a Trading Platform\n";
+          isValid = false;
+        }
+
+        if (!isValid) {
+          alert(errorMessage);
+        }
+
+        return isValid;
+      }
+    </script>
+  </body>
+</html>

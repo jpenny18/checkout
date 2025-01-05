@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background: #121212;
+        color: #fff;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        background: #1e1e1e;
+      }
+      th,
+      td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #333;
+      }
+      th {
+        background: #2d2d2d;
+        color: #f7c843;
+      }
+      .pagination {
+        margin-top: 20px;
+        display: flex;
+        gap: 10px;
+      }
+      .pagination button {
+        padding: 8px 16px;
+        background: #2d2d2d;
+        border: none;
+        color: white;
+        cursor: pointer;
+        transition: background 0.3s ease;
+      }
+      .pagination button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .pagination button:hover {
+        background: #444;
+      }
+      .tab-buttons {
+        margin-bottom: 20px;
+      }
+      .tab-button {
+        background: #2d2d2d;
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        margin-right: 10px;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: background 0.3s ease;
+      }
+      .tab-button.active {
+        background: #f7c843;
+        color: #121212;
+      }
+      .tab-button:hover {
+        background: #444;
+      }
+      #users-section,
+      .crypto-payments-section {
+        display: none;
+      }
+      #users-section.active,
+      .crypto-payments-section.active {
+        display: block;
+      }
+      .loading-spinner {
+        display: none;
+        text-align: center;
+        margin-top: 20px;
+      }
+      .loading-spinner span {
+        font-size: 24px;
+        color: #f7c843;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>User Data Dashboard</h1>
+      <div class="tab-buttons">
+        <button class="tab-button active" data-tab="users">Users</button>
+        <button class="tab-button" data-tab="crypto">Crypto Payments</button>
+      </div>
+      <div id="users-section" class="active">
+        <div id="loading-spinner" class="loading-spinner">
+          <span>Loading...</span>
+        </div>
+        <div id="users-table"></div>
+        <div class="pagination" id="pagination"></div>
+      </div>
+      <div class="crypto-payments-section">
+        <h2>Crypto Payments</h2>
+        <div class="filters">
+          <div class="auto-settings">
+            <h3>Automatic Approval Settings</h3>
+            <div class="setting">
+              <label>Max Auto-Approve Amount:</label>
+              <input type="number" id="maxAutoAmount" value="5000" />
+            </div>
+            <div class="setting">
+              <label>Required Previous Payments:</label>
+              <input type="number" id="minPrevPayments" value="1" />
+            </div>
+            <button onclick="saveAutoSettings()">Save Settings</button>
+          </div>
+          <select id="status-filter">
+            <option value="all">All</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </div>
+        <table class="crypto-payments-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Customer</th>
+              <th>Amount</th>
+              <th>Crypto</th>
+              <th>Transaction ID</th>
+              <th>Screenshot</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="crypto-payments-body">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      let currentPage = 1;
+      const apiKey = prompt("Enter API Key:");
+
+      async function showLoading() {
+        document.getElementById("loading-spinner").style.display = "block";
+      }
+
+      async function hideLoading() {
+        document.getElementById("loading-spinner").style.display = "none";
+      }
+
+      async function fetchUsers(page = 1) {
+        try {
+          showLoading();
+          const response = await fetch(`/api/admin/users?page=${page}`, {
+            headers: {
+              "x-api-key": apiKey,
+            },
+          });
+          const data = await response.json();
+          renderUsers(data);
+        } catch (error) {
+          alert("Error fetching users: " + error.message);
+        } finally {
+          hideLoading();
+        }
+      }
+
+      function renderUsers(data) {
+        if (!data || !data.users) return;
+
+        const table = `
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Challenge Type</th>
+                <th>Amount</th>
+                <th>Platform</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${data.users
+                .map(
+                  (user) => `
+                    <tr>
+                      <td>${user.firstName} ${user.lastName}</td>
+                      <td>${user.email || "N/A"}</td>
+                      <td>${user.challengeType || "N/A"}</td>
+                      <td>${user.challengeAmount || "N/A"}</td>
+                      <td>${user.platform || "N/A"}</td>
+                      <td>${new Date(user.createdAt).toLocaleString()}</td>
+                    </tr>`
+                )
+                .join("")}
+            </tbody>
+          </table>
+        `;
+        document.getElementById("users-table").innerHTML = table;
+
+        const pagination = `
+          <button ${
+            data.currentPage === 1 ? "disabled" : ""
+          } onclick="fetchUsers(${data.currentPage - 1})">Previous</button>
+          <span>Page ${data.currentPage} of ${data.totalPages}</span>
+          <button ${
+            data.currentPage === data.totalPages ? "disabled" : ""
+          } onclick="fetchUsers(${data.currentPage + 1})">Next</button>
+        `;
+        document.getElementById("pagination").innerHTML = pagination;
+      }
+
+      async function loadCryptoPayments(status = "all") {
+        try {
+          showLoading();
+          const response = await fetch(
+            `/api/admin/crypto-payments?status=${status}`,
+            {
+              headers: {
+                "x-api-key": apiKey,
+              },
+            }
+          );
+          const data = await response.json();
+          renderCryptoPayments(data);
+        } catch (error) {
+          alert("Error loading crypto payments: " + error.message);
+        } finally {
+          hideLoading();
+        }
+      }
+
+      function renderCryptoPayments(data) {
+        const tbody = document.getElementById("crypto-payments-body");
+        tbody.innerHTML = data.payments
+          .map(
+            (payment) => `
+              <tr>
+                <td>${new Date(payment.createdAt).toLocaleString()}</td>
+                <td>${payment.userId.firstName} ${payment.userId.lastName}</td>
+                <td>${payment.amount}</td>
+                <td>${payment.cryptoType}</td>
+                <td>${payment.transactionId}</td>
+                <td>
+                  ${
+                    payment.screenshot
+                      ? `<a href="${payment.screenshot}" target="_blank">View</a>`
+                      : "No screenshot"
+                  }
+                </td>
+                <td>${payment.status}</td>
+                <td>
+                  ${
+                    payment.status === "pending"
+                      ? `
+                    <button onclick="updatePaymentStatus('${payment._id}', 'approved')">Approve</button>
+                    <button onclick="updatePaymentStatus('${payment._id}', 'rejected')">Reject</button>
+                  `
+                      : ""
+                  }
+                </td>
+              </tr>
+            `
+          )
+          .join("");
+      }
+
+      async function updatePaymentStatus(paymentId, status) {
+        const confirmation = await confirmAction(
+          `Are you sure you want to mark this payment as ${status}?`
+        );
+        if (!confirmation) return;
+
+        try {
+          const response = await fetch(`/api/crypto-payments/${paymentId}`, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              "x-api-key": apiKey,
+            },
+            body: JSON.stringify({ status }),
+          });
+
+          if (response.ok) {
+            loadCryptoPayments();
+          }
+        } catch (error) {
+          alert("Error updating payment status: " + error.message);
+        }
+      }
+
+      function confirmAction(message) {
+        return new Promise((resolve) => {
+          if (window.confirm(message)) {
+            resolve(true);
+          } else {
+            resolve(false);
+          }
+        });
+      }
+
+      function saveAutoSettings() {
+        const maxAutoAmount = document.getElementById("maxAutoAmount").value;
+        const minPrevPayments =
+          document.getElementById("minPrevPayments").value;
+        alert(
+          `Settings Saved: Max Auto-Approve Amount: ${maxAutoAmount}, Min Previous Payments: ${minPrevPayments}`
+        );
+      }
+
+      document.querySelectorAll(".tab-button").forEach((button) => {
+        button.addEventListener("click", () => {
+          document
+            .querySelectorAll(".tab-button")
+            .forEach((btn) => btn.classList.remove("active"));
+          button.classList.add("active");
+
+          const tab = button.dataset.tab;
+          document.getElementById("users-section").classList.remove("active");
+          document
+            .querySelector(".crypto-payments-section")
+            .classList.remove("active");
+
+          if (tab === "users") {
+            fetchUsers();
+            document.getElementById("users-section").classList.add("active");
+          } else {
+            loadCryptoPayments();
+            document
+              .querySelector(".crypto-payments-section")
+              .classList.add("active");
+          }
+        });
+      });
+
+      window.onload = () => {
+        fetchUsers();
+        loadCryptoPayments();
+      };
+    </script>
+  </body>
+</html>

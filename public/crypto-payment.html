@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Crypto Payment</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #121212;
+        color: #fff;
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+      }
+      .container {
+        max-width: 500px;
+        width: 100%;
+        background: #1e1e1e;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        padding: 30px;
+      }
+      h1 {
+        text-align: center;
+        color: #fff;
+        margin-bottom: 30px;
+      }
+      .amount {
+        text-align: center;
+        font-size: 2.5em;
+        color: #f7c843;
+        margin: 20px 0;
+      }
+      .crypto-selector {
+        text-align: center;
+        margin: 20px 0;
+      }
+      .crypto-selector select {
+        padding: 10px 20px;
+        font-size: 1.1em;
+        border: 1px solid #333;
+        border-radius: 5px;
+        width: 100%;
+        max-width: 300px;
+        background: #2d2d2d;
+        color: #fff;
+      }
+      .payment-details {
+        display: none;
+        margin-top: 30px;
+      }
+      .qr-container {
+        text-align: center;
+        margin: 20px 0;
+        padding: 20px;
+        background: #2d2d2d;
+        border-radius: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .qr-container canvas {
+        max-width: 100%;
+        height: auto;
+      }
+      .wallet-address {
+        background: #2d2d2d;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 20px 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #fff;
+      }
+      .copy-btn {
+        background: #f7c843;
+        color: #121212;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+      .network-info {
+        text-align: center;
+        color: #999;
+        margin: 10px 0;
+      }
+      .status-checker {
+        text-align: center;
+        margin-top: 30px;
+      }
+      .purchase-btn {
+        background: #f7c843;
+        color: #121212;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 5px;
+        font-size: 1.1em;
+        cursor: pointer;
+        width: 100%;
+        font-weight: bold;
+        transition: background-color 0.3s;
+      }
+      .purchase-btn:hover {
+        background-color: #d1a736;
+      }
+      .payment-status {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 5px;
+        display: none;
+      }
+      .status-message {
+        font-size: 1.1em;
+        margin-bottom: 10px;
+        color: #f7c843;
+      }
+      .confirmation-count {
+        font-size: 0.9em;
+        color: #f7c843;
+      }
+      .network-warning {
+        color: #999;
+        font-size: 0.8em;
+        margin: 5px 0;
+        text-align: center;
+      }
+      .crypto-amount {
+        font-size: 1.2em;
+        color: #f7c843;
+        margin: 15px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Deposit with cryptocurrency!</h1>
+
+      <div class="amount">$<span id="fiat-amount">0.00</span></div>
+
+      <div class="crypto-amount">
+        = <span id="crypto-value">0.00</span>
+        <span id="crypto-symbol">BTC</span>
+      </div>
+
+      <div class="crypto-selector">
+        <select id="crypto-select" onchange="updateCryptoDetails()">
+          <option value="BTC">Bitcoin (BTC)</option>
+          <option value="ETH">Ethereum (ETH)</option>
+          <option value="LTC">Litecoin (LTC)</option>
+          <option value="USDT">Tether (USDT)</option>
+          <option value="BNB">Binance Coin (BNB)</option>
+        </select>
+      </div>
+
+      <button
+        id="purchase-btn"
+        class="purchase-btn"
+        onclick="showPaymentDetails()"
+      >
+        Purchase
+      </button>
+
+      <div id="payment-details" class="payment-details">
+        <div class="qr-container">
+          <div id="qr-code"></div>
+        </div>
+
+        <div class="wallet-address">
+          <span id="wallet-address"></span>
+          <button class="copy-btn" onclick="copyAddress()">Copy</button>
+        </div>
+
+        <div class="network-info">Network: <span id="network-type"></span></div>
+
+        <div class="status-checker">
+          <p>Waiting for payment...</p>
+          <p>Transaction will be automatically verified</p>
+        </div>
+      </div>
+
+      <div id="payment-status" class="payment-status">
+        <div class="status-message"></div>
+        <div class="confirmation-count"></div>
+      </div>
+
+      <div id="network-warning"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <script>
+      const COINGECKO_API = "https://api.coingecko.com/api/v3";
+
+      async function getCryptoPrice(crypto) {
+        const symbols = {
+          BTC: "bitcoin",
+          ETH: "ethereum",
+          LTC: "litecoin",
+          USDT: "tether",
+          BNB: "binancecoin",
+        };
+
+        try {
+          const response = await fetch(
+            `${COINGECKO_API}/simple/price?ids=${symbols[crypto]}&vs_currencies=usd`
+          );
+          const data = await response.json();
+          return data[symbols[crypto]].usd;
+        } catch (error) {
+          console.error("Error fetching price:", error);
+          return null;
+        }
+      }
+
+      const cryptoConfig = {
+        BTC: {
+          address: "bc1q4zs3mwhv50vgfp05pawdp0s2w8qfd0h824464u",
+          network: "Bitcoin Network",
+          confirmations: 2,
+        },
+        ETH: {
+          address: "0x54634008a757D262f0fD05213595dEE77a82026B",
+          network: "Ethereum Network",
+          confirmations: 12,
+        },
+        LTC: {
+          address: "ltc1qtfyeku2v9r4v4wnn5ufhtquh78ke6v7k84qe9v",
+          network: "Litecoin Network",
+          confirmations: 6,
+        },
+        USDT: {
+          address: "TLVMLJhSmWTTtitpeF5Gvv2j4avXVZ3EMd",
+          network: "Tron Network (TRC20)",
+          confirmations: 1,
+        },
+        BNB: {
+          address: "0x54634008a757D262f0fD05213595dEE77a82026B",
+          network: "BNB Smart Chain (BEP20)",
+          confirmations: 1,
+        },
+      };
+
+      function validatePaymentData() {
+        const amount = localStorage.getItem("selectedPrice");
+        if (!amount || amount === "0.00") {
+          alert("Invalid payment amount. Please return to checkout.");
+          window.location.href = "/index.html";
+          return false;
+        }
+        return true;
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        if (!validatePaymentData()) return;
+        // Get payment amount from localStorage
+        const storedAmount = localStorage.getItem("selectedPrice");
+        const paymentAmount = storedAmount || "0.00";
+
+        // Update the display
+        document.getElementById("fiat-amount").textContent = paymentAmount;
+
+        // Initialize crypto details
+        updateCryptoDetails();
+
+        // Debug log
+        console.log("Payment Details:", {
+          amount: paymentAmount,
+          storedFormData: JSON.parse(localStorage.getItem("formData") || "{}"),
+          challengeType: localStorage.getItem("challengeType"),
+          challengeAmount: localStorage.getItem("challengeAmount"),
+        });
+      });
+
+      function showPaymentDetails() {
+        document.getElementById("payment-details").style.display = "block";
+        document.getElementById("purchase-btn").style.display = "none";
+        updateCryptoDetails();
+      }
+
+      async function updateCryptoDetails() {
+        const selectedCrypto = document.getElementById("crypto-select").value;
+        const config = cryptoConfig[selectedCrypto];
+        const fiatAmount = parseFloat(
+          document.getElementById("fiat-amount").textContent
+        );
+
+        // Update address and network
+        document.getElementById("wallet-address").textContent = config.address;
+        document.getElementById("network-type").textContent = config.network;
+
+        // Show network warning
+        const warningContainer = document.getElementById("network-warning");
+        warningContainer.innerHTML = showNetworkWarning(selectedCrypto);
+
+        // Update crypto amount
+        const cryptoPrice = await getCryptoPrice(selectedCrypto);
+        if (cryptoPrice) {
+          const cryptoAmount = fiatAmount / cryptoPrice;
+          document.getElementById("crypto-value").textContent =
+            cryptoAmount.toFixed(8);
+          document.getElementById("crypto-symbol").textContent = selectedCrypto;
+
+          // Add back QR code generation
+          generateQR(config.address);
+        }
+
+        // Initialize payment verifier
+        const verifier = new PaymentVerifier(fiatAmount, selectedCrypto);
+        startPaymentCheck(verifier);
+      }
+
+      function generateQR(address) {
+        const qrContainer = document.getElementById("qr-code");
+        // Clear previous QR code
+        qrContainer.innerHTML = "";
+
+        try {
+          // Create a new canvas element
+          const canvas = document.createElement("canvas");
+          qrContainer.appendChild(canvas);
+
+          // Generate QR code
+          QRCode.toCanvas(
+            canvas,
+            address,
+            {
+              width: 200,
+              margin: 2,
+              color: {
+                dark: "#ffffff", // QR code color
+                light: "#2d2d2d", // Background color
+              },
+            },
+            function (error) {
+              if (error) {
+                console.error("QR Code generation error:", error);
+                qrContainer.innerHTML = "Error generating QR code";
+              }
+            }
+          );
+        } catch (error) {
+          console.error("QR Code error:", error);
+          qrContainer.innerHTML = "Error generating QR code";
+        }
+      }
+
+      function copyAddress() {
+        const address = document.getElementById("wallet-address").textContent;
+        navigator.clipboard.writeText(address);
+        alert("Address copied to clipboard!");
+      }
+
+      let checkInterval;
+      function startPaymentCheck(verifier) {
+        if (checkInterval) clearInterval(checkInterval);
+        updatePaymentStatus("waiting");
+
+        checkInterval = setInterval(async () => {
+          try {
+            const address = cryptoConfig[verifier.cryptoType].address;
+            const transactions = await checkTransaction(
+              address,
+              verifier.cryptoType
+            );
+
+            if (await verifier.verifyPayment(transactions)) {
+              clearInterval(checkInterval);
+              clearPaymentData();
+              window.location.href = "/success.html";
+            }
+          } catch (error) {
+            console.error("Error checking payment status:", error);
+            updatePaymentStatus("error", error.message);
+          }
+        }, 10000);
+      }
+
+      // Add blockchain explorers API endpoints
+      const BLOCKCHAIN_APIS = {
+        BTC: {
+          url: `https://api.blockcypher.com/v1/btc/main/addrs/$ADDRESS/full?limit=1`,
+          headers: {
+            Authorization: "Token v2.93ed6c94be2343c5ba30ac3b9ad1bd6b",
+          },
+        },
+        ETH: {
+          url: `https://api.etherscan.io/api?apikey=GBVUFB4SC4UVHEXGFU5VGAM6YWY52636SV`,
+          headers: {},
+        },
+        LTC: {
+          url: `https://api.blockcypher.com/v1/ltc/main/addrs/$ADDRESS/full?limit=1`,
+          headers: {
+            Authorization: "Token v2.93ed6c94be2343c5ba30ac3b9ad1bd6b",
+          },
+        },
+        USDT: {
+          url: `https://api.trongrid.io/v1/accounts/$ADDRESS/transactions/trc20`,
+          headers: {
+            "TRON-PRO-API-KEY": "4cc99816-cc80-4b09-90ed-b2ffebc0699c",
+          },
+        },
+        BNB: {
+          url: `https://api.etherscan.io/api?apikey=GBVUFB4SC4UVHEXGFU5VGAM6YWY52636SV`,
+          headers: {},
+        },
+      };
+
+      async function checkTransaction(address, crypto) {
+        // Check rate limit first
+        try {
+          checkRateLimit(crypto);
+        } catch (error) {
+          updatePaymentStatus("error", error.message);
+          return null;
+        }
+
+        const config = BLOCKCHAIN_APIS[crypto];
+        const url = config.url.replace("$ADDRESS", address);
+
+        try {
+          const response = await fetch(url, {
+            headers: config.headers,
+          });
+
+          if (!response.ok) {
+            // Handle API-specific error responses
+            switch (crypto) {
+              case "ETH":
+              case "BNB":
+                const ethData = await response.json();
+                if (ethData.status === "0") {
+                  throw new Error(ethData.message || "Etherscan API error");
+                }
+                break;
+              default:
+                throw new Error(
+                  `API returned ${response.status}: ${response.statusText}`
+                );
+            }
+          }
+
+          const data = await response.json();
+
+          // Log successful response for debugging
+          console.log(`${crypto} API Response:`, data);
+
+          switch (crypto) {
+            case "BTC":
+            case "LTC":
+              return data.txs || [];
+            case "ETH":
+            case "BNB":
+              return data.result;
+            case "USDT":
+              return data.data;
+            default:
+              throw new Error("Unsupported cryptocurrency");
+          }
+        } catch (error) {
+          console.error(`Error checking ${crypto} transaction:`, error);
+          updatePaymentStatus("error", `API Error: ${error.message}`);
+          return null;
+        }
+      }
+
+      class PaymentVerifier {
+        constructor(expectedAmount, cryptoType) {
+          this.expectedAmount = expectedAmount;
+          this.cryptoType = cryptoType;
+          this.confirmations = cryptoConfig[cryptoType].confirmations;
+          this.lastCheckedTx = null;
+          // Get stored form data including platform
+          this.formData = JSON.parse(localStorage.getItem("formData") || "{}");
+        }
+
+        async verifyPayment(transactions) {
+          if (!transactions || transactions.length === 0) return false;
+
+          // Get latest transaction
+          const latestTx = transactions[0];
+
+          // Skip if we've already checked this transaction
+          if (this.lastCheckedTx === latestTx.hash) return false;
+          this.lastCheckedTx = latestTx.hash;
+
+          // Verify amount and recipient
+          const isCorrectAmount = this.verifyAmount(latestTx);
+          const isCorrectRecipient = this.verifyRecipient(latestTx);
+          const hasEnoughConfirmations = this.verifyConfirmations(latestTx);
+
+          if (isCorrectAmount && isCorrectRecipient) {
+            updatePaymentStatus("received");
+            if (hasEnoughConfirmations) {
+              // Send to admin dashboard with platform info
+              await this.sendToAdminDashboard(latestTx);
+              updatePaymentStatus("confirmed");
+              return true;
+            }
+          }
+
+          return false;
+        }
+
+        verifyAmount(tx) {
+          // Implementation varies by blockchain
+          return true; // Placeholder
+        }
+
+        verifyRecipient(tx) {
+          const expectedAddress = cryptoConfig[this.cryptoType].address;
+          return tx.to === expectedAddress;
+        }
+
+        verifyConfirmations(tx) {
+          return tx.confirmations >= this.confirmations;
+        }
+
+        async sendToAdminDashboard(transaction) {
+          try {
+            const dashboardData = {
+              transaction: transaction.hash,
+              amount: this.expectedAmount,
+              cryptoType: this.cryptoType,
+              platform: this.formData.platform,
+              customerInfo: this.formData,
+              timestamp: new Date().toISOString(),
+            };
+
+            // Log the data being sent to dashboard
+            console.log("Sending to admin dashboard:", dashboardData);
+
+            // Here you would typically send this to your backend
+            // await fetch('/api/admin/transactions', {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify(dashboardData)
+            // });
+          } catch (error) {
+            console.error("Error sending to admin dashboard:", error);
+          }
+        }
+      }
+
+      function updatePaymentStatus(status, details) {
+        const statusElement = document.querySelector(".status-message");
+        const statusContainer = document.querySelector(".payment-status");
+
+        switch (status) {
+          case "waiting":
+            statusContainer.style.display = "none";
+            break;
+          case "received":
+            statusContainer.style.display = "block";
+            statusElement.innerHTML =
+              "Payment detected! Waiting for confirmations...";
+            break;
+          case "confirmed":
+            statusContainer.style.display = "block";
+            statusElement.innerHTML = "Payment confirmed!";
+            break;
+          case "error":
+            // Only show critical errors that user needs to know about
+            if (details && details.includes("critical")) {
+              statusContainer.style.display = "block";
+              statusElement.innerHTML = `Error: ${details}`;
+            }
+            break;
+        }
+      }
+
+      function showNetworkWarning(crypto) {
+        const warnings = {
+          BTC: "Please ensure you're sending Bitcoin (BTC) on the Bitcoin network",
+          ETH: "Compatible with ERC-20 network only",
+          USDT: "Send USDT using TRC20 network only",
+          BNB: "Compatible with BSC (BEP-20) network only",
+        };
+
+        return `<div class="network-warning">ℹ️ ${warnings[crypto]}</div>`;
+      }
+
+      const rateLimits = {
+        BTC: {
+          requests: 0,
+          lastReset: Date.now(),
+          limit: 200, // BlockCypher: 200 requests per hour
+          resetInterval: 3600000, // 1 hour in milliseconds
+        },
+        ETH: {
+          requests: 0,
+          lastReset: Date.now(),
+          limit: 100000, // Etherscan: 100k requests per day
+          resetInterval: 86400000, // 24 hours in milliseconds
+        },
+        LTC: {
+          requests: 0,
+          lastReset: Date.now(),
+          limit: 200, // BlockCypher: 200 requests per hour
+          resetInterval: 3600000,
+        },
+        USDT: {
+          requests: 0,
+          lastReset: Date.now(),
+          limit: 30000, // TronGrid: 30k requests per day
+          resetInterval: 86400000,
+        },
+        BNB: {
+          requests: 0,
+          lastReset: Date.now(),
+          limit: 100000, // BSCScan: 100k requests per day
+          resetInterval: 86400000,
+        },
+      };
+
+      function checkRateLimit(crypto) {
+        const limit = rateLimits[crypto];
+        const now = Date.now();
+
+        // Reset counter if interval has passed
+        if (now - limit.lastReset >= limit.resetInterval) {
+          limit.requests = 0;
+          limit.lastReset = now;
+        }
+
+        // Check if we're over limit
+        if (limit.requests >= limit.limit) {
+          throw new Error(
+            `Rate limit exceeded for ${crypto}. Please try again later.`
+          );
+        }
+
+        // Increment counter
+        limit.requests++;
+        return true;
+      }
+
+      async function testAPIConnections() {
+        const testAddresses = {
+          BTC: "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa", // Bitcoin genesis address
+          ETH: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2", // WETH contract
+          LTC: "LajyQBeZaBA1NkZDeY8YT5RYYVRkXMvb2T", // Random LTC address
+          USDT: "TMuA6YqfCeX8EhbfYEg5y7S4DqzSJireY9", // Binance hot wallet
+          BNB: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2", // Same as ETH
+        };
+
+        console.log("Testing API Connections...");
+
+        for (const [crypto, address] of Object.entries(testAddresses)) {
+          try {
+            console.log(`\nTesting ${crypto}...`);
+            const transactions = await checkTransaction(address, crypto);
+            console.log(
+              `${crypto} API Response:`,
+              transactions ? "Success ✅" : "No transactions found"
+            );
+          } catch (error) {
+            console.error(`${crypto} API Error ❌:`, error.message);
+          }
+        }
+      }
+
+      // Call the test function
+      testAPIConnections();
+
+      function clearPaymentData() {
+        localStorage.removeItem("selectedPrice");
+        localStorage.removeItem("formData");
+        localStorage.removeItem("challengeType");
+        localStorage.removeItem("challengeAmount");
+      }
+    </script>
+  </body>
+</html>

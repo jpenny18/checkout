@@ -2,3 +2,6 @@ node_modules
 .env
 .env.production
 .vercel 
+.DS_Store 
+.env.local
+.env.*.local 

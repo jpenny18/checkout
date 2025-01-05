@@ -116,12 +116,16 @@
       }
 
       .terms-group {
-        margin: 30px 0;
+        margin: 20px 0;
       }
 
       .terms-group a {
         color: #f7c843;
         text-decoration: none;
+      }
+
+      .terms-group a:hover {
+        text-decoration: underline;
       }
 
       .payment-due {
@@ -388,21 +392,37 @@
       }
 
       .benefits-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+        margin: 20px 0;
+        width: 100%;
       }
 
       .benefit-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 6px;
-        padding: 10px;
+        flex: 1;
+        min-width: 0;
         background: #2d2d2d;
+        padding: 15px;
         border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.2s ease;
+        text-align: center;
+      }
+
+      .benefit-item .benefit-icon {
+        font-size: 24px;
+        display: block;
+        margin-bottom: 8px;
+      }
+
+      .benefit-item h4 {
+        margin: 8px 0;
+        font-size: 14px;
+      }
+
+      .benefit-item p {
+        margin: 0;
+        font-size: 12px;
+        color: #999;
       }
 
       .benefit-item:hover {
@@ -415,45 +435,19 @@
         color: #f7c843;
       }
 
-      .benefit-item h4 {
-        font-size: 0.85em;
-        font-weight: bold;
-        color: #ffffff;
-        margin: 0;
-      }
-
-      .benefit-item p {
-        color: #999;
-        font-size: 0.75em;
-        margin: 0;
-        text-align: center;
-      }
-
       @media (max-width: 768px) {
-        .metrics-container {
-          max-width: 100%;
-          overflow-x: auto;
+        .benefits-grid {
+          flex-wrap: wrap;
         }
 
-        .metrics-table {
-          font-size: 0.8em;
-        }
-
-        .metrics-table th,
-        .metrics-table td {
-          padding: 8px 4px;
-          white-space: nowrap;
+        .benefit-item {
+          flex: 1 1 45%;
         }
       }
 
       @media (max-width: 480px) {
-        .metrics-table {
-          font-size: 0.7em;
-        }
-
-        .metrics-table th,
-        .metrics-table td {
-          padding: 6px 3px;
+        .benefit-item {
+          flex: 1 1 100%;
         }
       }
 
@@ -561,6 +555,73 @@
 
       .error-message.show {
         display: block;
+      }
+
+      .payment-method-logo {
+        height: 24px;
+        vertical-align: middle;
+        margin-right: 10px;
+        object-fit: contain;
+      }
+
+      .payment-option {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 20px;
+        background: #2d2d2d;
+        border-radius: 8px;
+        border: 1px solid #3d3d3d;
+        transition: all 0.2s ease;
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .payment-option:hover {
+        background: #363636;
+        border-color: #f7c843;
+      }
+
+      .checkbox-label {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        cursor: pointer;
+      }
+
+      .checkbox-label input[type="checkbox"] {
+        margin-top: 3px;
+      }
+
+      .checkbox-text {
+        font-size: 0.9em;
+        color: #999;
+        line-height: 1.4;
+      }
+
+      .checkbox-text a {
+        color: #f7c843;
+        text-decoration: none;
+      }
+
+      .checkbox-text a:hover {
+        text-decoration: underline;
+      }
+
+      .terms-group .error-message {
+        color: #ff4444;
+        font-size: 0.8em;
+        margin-top: 5px;
+        display: none;
+      }
+
+      .terms-group .error-message.show {
+        display: block;
+      }
+
+      .checkout-button:disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
       }
     </style>
   </head>
@@ -695,13 +756,19 @@
             </div>
 
             <div class="terms-group">
-              <label>
-                <input type="checkbox" required />
-                I confirm that I am 18 years or older and agree to the
-                <a href="#">Terms and Conditions</a>,
-                <a href="#">Privacy Notice</a> and
-                <a href="#">Cookies Notice</a>
+              <label class="checkbox-label">
+                <input type="checkbox" required id="terms-checkbox" />
+                <span class="checkbox-text">
+                  I confirm that I am 18 years or older and agree to the
+                  <a href="#" target="_blank">Terms and Conditions</a>,
+                  <a href="#" target="_blank">Privacy Notice</a>,
+                  <a href="#" target="_blank">Cookies Notice</a>, and
+                  <a href="#" target="_blank">Refund/Chargeback Policy</a>
+                </span>
               </label>
+              <div class="error-message" id="terms-error">
+                You must accept the terms to continue
+              </div>
             </div>
 
             <div class="payment-due">
@@ -732,22 +799,41 @@
         <h2>Choose Payment Method</h2>
         <div class="selected-amount"></div>
         <div class="payment-options">
-          <div class="payment-option" data-gateway="stripe">
-            <img src="/images/stripe-logo.png" alt="Stripe" />
-            <p>Pay with Stripe</p>
-          </div>
-          <div class="payment-option" data-gateway="paypal">
-            <img src="/images/paypal-logo.png" alt="PayPal" />
-            <p>Pay with PayPal</p>
-          </div>
-          <div class="payment-option" data-gateway="crypto">
-            <img src="/images/crypto-logo.png" alt="Cryptocurrency" />
-            <p>Pay with Crypto</p>
-          </div>
-          <div class="payment-option" data-gateway="wise">
-            <img src="/images/wise-logo.png" alt="Wise" />
-            <p>Pay with Wise</p>
-          </div>
+          <button onclick="selectPayment('crypto')" class="payment-option">
+            <img
+              src="/images/crypto.png"
+              alt="Crypto"
+              class="payment-method-logo"
+            />
+            Pay with Cryptocurrency
+          </button>
+
+          <button onclick="selectPayment('stripe')" class="payment-option">
+            <img
+              src="/images/stripe.png"
+              alt="Stripe"
+              class="payment-method-logo"
+            />
+            Pay with Card
+          </button>
+
+          <button onclick="selectPayment('paypal')" class="payment-option">
+            <img
+              src="/images/paypal.png"
+              alt="PayPal"
+              class="payment-method-logo"
+            />
+            Pay with PayPal
+          </button>
+
+          <button onclick="selectPayment('wise')" class="payment-option">
+            <img
+              src="/images/wise.png"
+              alt="Wise"
+              class="payment-method-logo"
+            />
+            Pay with Wise
+          </button>
         </div>
         <p class="redirect-notice">
           You'll be securely redirected to complete your purchase and
@@ -1402,58 +1488,55 @@
         // Form Submission
         document
           .querySelector(".checkout-button")
-          .addEventListener("click", (e) => {
+          .addEventListener("click", async (e) => {
             e.preventDefault();
 
-            // Reset all error states
+            // Reset error states
             document
               .querySelectorAll(".form-group input, .form-group select")
               .forEach((input) => {
                 input.classList.remove("error");
               });
 
-            // Check challenge type selection
+            // Validate selections and form data
             const selectedType = document.querySelector(
               ".challenge-card.selected"
             )?.dataset.type;
-            if (!selectedType) {
-              alert("Please select a challenge type");
-              return;
-            }
-
-            // Check account size selection
             const selectedAmount = document.querySelector(
               ".challenge-option.selected"
             )?.dataset.amount;
-            if (!selectedAmount) {
-              alert("Please select an account size");
-              return;
-            }
-
-            // Check platform selection
             const selectedPlatform = document.querySelector(
               ".platform-buttons button.selected"
             )?.textContent;
-            if (!selectedPlatform) {
-              alert("Please select a trading platform");
+
+            // Basic validations
+            if (!selectedType || !selectedAmount || !selectedPlatform) {
+              alert("Please select challenge type, amount, and platform");
               return;
             }
 
-            // Check personal details
-            let hasError = false;
-            const fields = {
-              firstName: document.getElementById("firstName"),
-              lastName: document.getElementById("lastName"),
-              email: document.getElementById("email"),
-              phone: document.getElementById("phone"),
-              country: document.getElementById("country"),
+            // Collect form data
+            const formData = {
+              firstName: document.getElementById("firstName").value.trim(),
+              lastName: document.getElementById("lastName").value.trim(),
+              email: document.getElementById("email").value.trim(),
+              phone: document.getElementById("phone").value.trim(),
+              countryCode: document.getElementById("countryCode").value,
+              country: document.getElementById("country").value,
+              platform: selectedPlatform,
+              challengeType: selectedType,
+              challengeAmount: selectedAmount,
             };
 
-            // Validate each field
-            Object.entries(fields).forEach(([key, field]) => {
-              if (!field.value.trim()) {
-                field.classList.add("error");
-                hasError = true;
+            // Validate form data
+            let hasError = false;
+            Object.entries(formData).forEach(([key, value]) => {
+              if (!value && key !== "countryCode") {
+                const field = document.getElementById(key);
+                if (field) {
+                  field.classList.add("error");
+                  hasError = true;
+                }
               }
             });
 
@@ -1462,12 +1545,34 @@
               return;
             }
 
-            // If all validations pass, show payment modal
-            const price = prices[selectedType][selectedAmount];
-            const modal = document.querySelector(".payment-modal");
-            const selectedAmountDiv = modal.querySelector(".selected-amount");
-            selectedAmountDiv.textContent = `Selected: ${selectedType} ${selectedAmount} - $${price}`;
-            modal.classList.add("active");
+            try {
+              // Save user data first
+              const response = await fetch("/api/collect-user-data", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(formData),
+              });
+
+              const result = await response.json();
+
+              if (!result.success) {
+                throw new Error(result.error || "Failed to save user data");
+              }
+
+              // If data is saved successfully, show payment modal
+              const price = prices[selectedType][selectedAmount];
+              const modal = document.querySelector(".payment-modal");
+              const selectedAmountDiv = modal.querySelector(".selected-amount");
+              selectedAmountDiv.textContent = `Selected: ${selectedType} ${selectedAmount} - $${price}`;
+              modal.classList.add("active");
+            } catch (error) {
+              console.error("Error:", error);
+              alert(
+                "There was an error processing your request. Please try again."
+              );
+            }
           });
 
         // Remove error class when user starts typing
@@ -1478,6 +1583,197 @@
               input.classList.remove("error");
             });
           });
+
+        document.querySelectorAll(".payment-option").forEach((option) => {
+          option.addEventListener("click", () => {
+            const selectedType = document.querySelector(
+              ".challenge-card.selected"
+            )?.dataset.type;
+            const selectedAmount = document.querySelector(
+              ".challenge-option.selected"
+            )?.dataset.amount;
+            const gateway = option.dataset.gateway;
+
+            if (gateway === "crypto") {
+              // Make sure selectedPrice is defined and has the correct value
+              console.log("Selected Price:", selectedPrice); // Debug log
+              localStorage.setItem("selectedPrice", selectedPrice);
+              localStorage.setItem("challengeType", selectedType);
+              localStorage.setItem("challengeAmount", selectedAmount);
+
+              // Get the user ID from the API response
+              fetch("/api/collect-user-data", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  firstName: document.getElementById("firstName").value,
+                  lastName: document.getElementById("lastName").value,
+                  email: document.getElementById("email").value,
+                  phone: document.getElementById("phone").value,
+                  country: document.getElementById("country").value,
+                  platform: document.querySelector(
+                    ".platform-buttons button.selected"
+                  )?.textContent,
+                }),
+              })
+                .then((response) => response.json())
+                .then((data) => {
+                  if (data.success) {
+                    localStorage.setItem("userId", data.userId);
+                    window.location.href = "/crypto-payment.html";
+                  } else {
+                    throw new Error(data.error || "Failed to save user data");
+                  }
+                })
+                .catch((error) => {
+                  console.error("Error:", error);
+                  alert("Error processing request. Please try again.");
+                });
+              return;
+            }
+
+            // Get payment link (for non-crypto payments)
+            const paymentLink =
+              paymentGateways[gateway]?.[selectedType]?.[selectedAmount] || "#";
+
+            // Add URL parameters
+            const params = new URLSearchParams({
+              customer_name: `${document.getElementById("firstName").value} ${
+                document.getElementById("lastName").value
+              }`,
+              customer_email: document.getElementById("email").value,
+              customer_phone: `${document.getElementById("countryCode").value}${
+                document.getElementById("phone").value
+              }`,
+              customer_country: document.getElementById("country").value,
+              platform: document.querySelector(
+                ".platform-buttons button.selected"
+              )?.textContent,
+              challenge_type: selectedType,
+              challenge_amount: selectedAmount,
+            });
+
+            // Handle redirect
+            if (paymentLink === "#") {
+              console.log(
+                "Would redirect to payment with data:",
+                Object.fromEntries(params)
+              );
+              alert("Test submission successful! Check the admin dashboard.");
+            } else {
+              window.location.href = `${paymentLink}?${params.toString()}`;
+            }
+          });
+        });
+
+        document.querySelector(".close-modal").addEventListener("click", () => {
+          document.querySelector(".payment-modal").classList.remove("active");
+        });
+
+        document
+          .querySelector(".payment-modal")
+          .addEventListener("click", (e) => {
+            if (e.target === e.currentTarget) {
+              e.target.classList.remove("active");
+            }
+          });
+
+        // Update the form validation
+        document
+          .querySelector(".checkout-form")
+          .addEventListener("submit", function (e) {
+            e.preventDefault(); // Prevent form submission initially
+
+            // Get all required inputs
+            const requiredInputs = this.querySelectorAll(
+              "input[required], select[required]"
+            );
+            const termsCheckbox = document.getElementById("terms-checkbox");
+            const termsError = document.getElementById("terms-error");
+            let isValid = true;
+
+            // Check all required fields
+            requiredInputs.forEach((input) => {
+              if (!input.value.trim()) {
+                isValid = false;
+                input.classList.add("error");
+                // Show error message if exists
+                const errorElement =
+                  input.parentElement.querySelector(".error-message");
+                if (errorElement) {
+                  errorElement.classList.add("show");
+                }
+              } else {
+                input.classList.remove("error");
+                // Hide error message if exists
+                const errorElement =
+                  input.parentElement.querySelector(".error-message");
+                if (errorElement) {
+                  errorElement.classList.remove("show");
+                }
+              }
+            });
+
+            // Check terms checkbox
+            if (!termsCheckbox.checked) {
+              isValid = false;
+              termsError.classList.add("show");
+              termsCheckbox.classList.add("error");
+            } else {
+              termsError.classList.remove("show");
+              termsCheckbox.classList.remove("error");
+            }
+
+            // Update proceed button state
+            const proceedButton = document.querySelector(".checkout-button");
+            proceedButton.disabled = !isValid;
+            proceedButton.style.opacity = isValid ? "1" : "0.5";
+
+            // If everything is valid, show payment modal
+            if (isValid) {
+              document.querySelector(".payment-modal").classList.add("active");
+            }
+          });
+
+        // Real-time validation for the checkbox
+        document
+          .getElementById("terms-checkbox")
+          .addEventListener("change", function () {
+            validateForm();
+          });
+
+        // Add real-time validation for all required fields
+        document
+          .querySelectorAll("input[required], select[required]")
+          .forEach((input) => {
+            input.addEventListener("input", validateForm);
+            input.addEventListener("change", validateForm);
+          });
+
+        // Validation function
+        function validateForm() {
+          const requiredInputs = document.querySelectorAll(
+            "input[required], select[required]"
+          );
+          const termsCheckbox = document.getElementById("terms-checkbox");
+          const proceedButton = document.querySelector(".checkout-button");
+          let isValid = true;
+
+          requiredInputs.forEach((input) => {
+            if (!input.value.trim()) {
+              isValid = false;
+            }
+          });
+
+          if (!termsCheckbox.checked) {
+            isValid = false;
+          }
+
+          proceedButton.disabled = !isValid;
+          proceedButton.style.opacity = isValid ? "1" : "0.5";
+        }
       });
 
       function collectFormData() {
@@ -1563,27 +1859,27 @@
       const paymentGateways = {
         stripe: {
           Gauntlet: {
-            "$50,000": "https://buy.stripe.com/live/gauntlet_50k_stripe",
-            "$100,000": "https://buy.stripe.com/live/gauntlet_100k_stripe",
-            "$300,000": "https://buy.stripe.com/live/gauntlet_300k_stripe",
+            "$50,000": "https://buy.stripe.com/YOUR_REAL_GAUNTLET_50K_LINK",
+            "$100,000": "https://buy.stripe.com/YOUR_REAL_GAUNTLET_100K_LINK",
+            "$300,000": "https://buy.stripe.com/YOUR_REAL_GAUNTLET_300K_LINK",
           },
           Ascendant: {
-            "$10,000": "https://buy.stripe.com/ascendant_10k_stripe",
-            "$25,000": "https://buy.stripe.com/ascendant_25k_stripe",
-            "$50,000": "https://buy.stripe.com/ascendant_50k_stripe",
+            "$10,000": "https://buy.stripe.com/YOUR_REAL_ASCENDANT_10K_LINK",
+            "$25,000": "https://buy.stripe.com/YOUR_REAL_ASCENDANT_25K_LINK",
+            "$50,000": "https://buy.stripe.com/YOUR_REAL_ASCENDANT_50K_LINK",
           },
           Standard: {
-            "$10,000": "https://buy.stripe.com/standard_10k_stripe",
-            "$25,000": "https://buy.stripe.com/standard_25k_stripe",
-            "$50,000": "https://buy.stripe.com/standard_50k_stripe",
-            "$100,000": "https://buy.stripe.com/standard_100k_stripe",
+            "$10,000": "https://buy.stripe.com/YOUR_REAL_STANDARD_10K_LINK",
+            "$25,000": "https://buy.stripe.com/YOUR_REAL_STANDARD_25K_LINK",
+            "$50,000": "https://buy.stripe.com/YOUR_REAL_STANDARD_50K_LINK",
+            "$100,000": "https://buy.stripe.com/YOUR_REAL_STANDARD_100K_LINK",
           },
         },
         paypal: {
           Gauntlet: {
-            "$50,000": "https://paypal.com/gauntlet_50k_link",
-            "$100,000": "https://paypal.com/gauntlet_100k_link",
-            "$300,000": "https://paypal.com/gauntlet_300k_link",
+            "$50,000": "YOUR_PAYPAL_GAUNTLET_50K_LINK",
+            "$100,000": "YOUR_PAYPAL_GAUNTLET_100K_LINK",
+            "$300,000": "YOUR_PAYPAL_GAUNTLET_300K_LINK",
           },
           Ascendant: {
             "$10,000": "https://paypal.com/ascendant_10k_link",
@@ -1595,6 +1891,24 @@
             "$25,000": "https://paypal.com/standard_25k_link",
             "$50,000": "https://paypal.com/standard_50k_link",
             "$100,000": "https://paypal.com/standard_100k_link",
+          },
+        },
+        wise: {
+          Gauntlet: {
+            "$50,000": "YOUR_WISE_GAUNTLET_50K_LINK",
+            "$100,000": "YOUR_WISE_GAUNTLET_100K_LINK",
+            "$300,000": "YOUR_WISE_GAUNTLET_300K_LINK",
+          },
+          Ascendant: {
+            "$10,000": "https://wise.com/ascendant_10k",
+            "$25,000": "https://wise.com/ascendant_25k",
+            "$50,000": "https://wise.com/ascendant_50k",
+          },
+          Standard: {
+            "$10,000": "https://wise.com/standard_10k",
+            "$25,000": "https://wise.com/standard_25k",
+            "$50,000": "https://wise.com/standard_50k",
+            "$100,000": "https://wise.com/standard_100k",
           },
         },
         crypto: {
@@ -1615,158 +1929,88 @@
             "$100,000": "https://crypto-gateway.com/standard_100k",
           },
         },
-        wise: {
-          Gauntlet: {
-            "$50,000": "https://wise.com/gauntlet_50k",
-            "$100,000": "https://wise.com/gauntlet_100k",
-            "$300,000": "https://wise.com/gauntlet_300k",
-          },
-          Ascendant: {
-            "$10,000": "https://wise.com/ascendant_10k",
-            "$25,000": "https://wise.com/ascendant_25k",
-            "$50,000": "https://wise.com/ascendant_50k",
-          },
-          Standard: {
-            "$10,000": "https://wise.com/standard_10k",
-            "$25,000": "https://wise.com/standard_25k",
-            "$50,000": "https://wise.com/standard_50k",
-            "$100,000": "https://wise.com/standard_100k",
-          },
-        },
       };
 
+      function selectPayment(method) {
+        // Get the amount from the total-amount element
+        const totalAmount = document.querySelector(".total-amount").textContent;
+        const amount = totalAmount.replace("$", "");
+
+        // Get selected platform
+        const selectedPlatform = document.querySelector(
+          ".platform-buttons button.selected"
+        )?.textContent;
+
+        // Store all necessary data in localStorage
+        localStorage.setItem("selectedPrice", amount);
+        localStorage.setItem(
+          "challengeType",
+          document.querySelector(".challenge-card.selected")?.dataset.type
+        );
+        localStorage.setItem(
+          "challengeAmount",
+          document.querySelector(".challenge-option.selected")?.dataset.amount
+        );
+        localStorage.setItem("selectedPlatform", selectedPlatform);
+
+        // Store form data
+        const formData = {
+          firstName: document.getElementById("firstName").value,
+          lastName: document.getElementById("lastName").value,
+          email: document.getElementById("email").value,
+          phone: document.getElementById("phone").value,
+          country: document.getElementById("country").value,
+          platform: selectedPlatform,
+        };
+        localStorage.setItem("formData", JSON.stringify(formData));
+
+        switch (method) {
+          case "crypto":
+            window.location.href = "/crypto-payment.html";
+            break;
+          // ... other cases remain the same
+        }
+      }
+
+      // Helper functions to get payment links
+      function getStripeLink(challengeType, amount) {
+        const stripeLinks = {
+          Gauntlet: {
+            "$50,000": "https://buy.stripe.com/your_gauntlet_50k_link",
+            "$100,000": "https://buy.stripe.com/your_gauntlet_100k_link",
+            // Add other amounts
+          },
+          // Add other challenge types
+        };
+        return stripeLinks[challengeType]?.[amount] || "#";
+      }
+
+      function getPayPalLink(amount) {
+        // Replace with your PayPal payment links
+        return `https://paypal.com/your-paypal-link?amount=${amount}`;
+      }
+
+      function getWiseLink(amount) {
+        // Replace with your Wise payment links
+        return `https://wise.com/your-wise-link?amount=${amount}`;
+      }
+
+      // Update the payment modal to show selected amount
+      function updatePaymentModal() {
+        const amount = document.querySelector(".total-amount").textContent;
+        document.querySelector(
+          ".selected-amount"
+        ).textContent = `Amount: ${amount}`;
+      }
+
+      // Add this to your existing modal open logic
       document
         .querySelector(".checkout-button")
-        .addEventListener("click", (e) => {
-          e.preventDefault();
-          const selectedType = document.querySelector(
-            ".challenge-card.selected"
-          )?.dataset.type;
-          const selectedAmount = document.querySelector(
-            ".challenge-option.selected"
-          )?.dataset.amount;
-
-          if (!selectedType || !selectedAmount) {
-            alert("Please select a challenge type and amount first");
-            return;
-          }
-
-          const price = prices[selectedType][selectedAmount];
-
-          const modal = document.querySelector(".payment-modal");
-          const selectedAmountDiv = modal.querySelector(".selected-amount");
-          selectedAmountDiv.textContent = `Selected: ${selectedType} ${selectedAmount} - $${price}`;
-          modal.classList.add("active");
-        });
-
-      document.querySelectorAll(".payment-option").forEach((option) => {
-        option.addEventListener("click", () => {
-          const selectedType = document.querySelector(
-            ".challenge-card.selected"
-          )?.dataset.type;
-          const selectedAmount = document.querySelector(
-            ".challenge-option.selected"
-          )?.dataset.amount;
-          const gateway = option.dataset.gateway;
-
-          // Verify we have the correct payment link
-          const paymentLink =
-            paymentGateways[gateway]?.[selectedType]?.[selectedAmount];
-          if (!paymentLink) {
-            alert("Payment option not available for this selection");
-            return;
-          }
-
-          // Collect and validate form data again
-          const formData = {
-            firstName: document.getElementById("firstName").value.trim(),
-            lastName: document.getElementById("lastName").value.trim(),
-            email: document.getElementById("email").value.trim(),
-            phone: document.getElementById("phone").value.trim(),
-            countryCode: document.getElementById("countryCode").value,
-            country: document.getElementById("country").value,
-            platform: document.querySelector(
-              ".platform-buttons button.selected"
-            )?.textContent,
-            challengeType: selectedType,
-            challengeAmount: selectedAmount,
-          };
-
-          // Final validation
-          if (
-            !formData.firstName ||
-            !formData.lastName ||
-            !formData.email ||
-            !formData.phone ||
-            !formData.platform ||
-            !formData.country
-          ) {
-            alert("Please fill in all required fields");
-            return;
-          }
-
-          // Add form data as URL parameters
-          const params = new URLSearchParams({
-            customer_name: `${formData.firstName} ${formData.lastName}`,
-            customer_email: formData.email,
-            customer_phone: `${formData.countryCode}${formData.phone}`,
-            customer_country: formData.country,
-            platform: formData.platform,
-            challenge_type: formData.challengeType,
-            challenge_amount: formData.challengeAmount,
-            price: prices[selectedType][selectedAmount],
-          });
-
-          // Redirect to payment
-          window.location.href = `${paymentLink}?${params.toString()}`;
-        });
-      });
-
-      document.querySelector(".close-modal").addEventListener("click", () => {
-        document.querySelector(".payment-modal").classList.remove("active");
-      });
-
-      document
-        .querySelector(".payment-modal")
-        .addEventListener("click", (e) => {
-          if (e.target === e.currentTarget) {
-            e.target.classList.remove("active");
+        .addEventListener("click", function () {
+          if (!this.disabled) {
+            updatePaymentModal();
           }
         });
-
-      // Add this function for form validation
-      function validateForm() {
-        const requiredFields = {
-          firstName: "First Name",
-          lastName: "Last Name",
-          email: "Email",
-          phone: "Phone Number",
-          platform: "Trading Platform",
-        };
-
-        let isValid = true;
-        let errorMessage = "Please fill in the following fields:\n";
-
-        for (const [field, label] of Object.entries(requiredFields)) {
-          const element = document.getElementById(field);
-          if (!element || !element.value.trim()) {
-            errorMessage += `- ${label}\n`;
-            isValid = false;
-          }
-        }
-
-        // Check if platform is selected
-        if (!document.querySelector(".platform-buttons button.selected")) {
-          errorMessage += "- Select a Trading Platform\n";
-          isValid = false;
-        }
-
-        if (!isValid) {
-          alert(errorMessage);
-        }
-
-        return isValid;
-      }
     </script>
   </body>
 </html>

@@ -8,10 +8,14 @@ const adminNotifier = require('../utils/adminNotifications');
 const customerNotifier = require('../utils/customerNotifications');
 const { cryptoPaymentValidation, validate } = require('../middleware/validation');
 const { authAdmin } = require('../middleware/auth');
+const mongoose = require('mongoose');
 
 // Collect user data
 router.post('/collect-user-data', async (req, res) => {
     try {
+        console.log('Received request:', req.body);
+        console.log('MongoDB connection state:', mongoose.connection.readyState);
+        
         const {
             firstName,
             lastName,
@@ -22,6 +26,7 @@ router.post('/collect-user-data', async (req, res) => {
             challengeAmount,
             platform
         } = req.body;
+        console.log('Parsed data:', { firstName, lastName, email });
 
         // Check if user already exists
         let user = await User.findOne({ email });
@@ -58,7 +63,11 @@ router.post('/collect-user-data', async (req, res) => {
             userId: user._id 
         });
     } catch (error) {
-        console.error('Error collecting user data:', error);
+        console.error('Detailed error:', {
+            message: error.message,
+            stack: error.stack,
+            mongoState: mongoose.connection.readyState
+        });
         res.status(500).json({ 
             success: false, 
             error: 'Failed to collect user data' 
@@ -275,6 +284,15 @@ router.post('/check-payment-status', async (req, res) => {
             error: 'Failed to check payment status' 
         });
     }
+});
+
+// Add error handling middleware
+router.use((err, req, res, next) => {
+    console.error('API Error:', err);
+    res.status(500).json({
+        success: false,
+        error: err.message
+    });
 });
 
 module.exports = router; 

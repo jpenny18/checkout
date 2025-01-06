@@ -1,7 +1,14 @@
 {
     "version": 2,
     "env": {
-        "NODE_ENV": "production"
+        "NODE_ENV": "production",
+        "ETHERSCAN_API_KEY": "${ETHERSCAN_API_KEY}",
+        "BSCSCAN_API_KEY": "${BSCSCAN_API_KEY}",
+        "BLOCKCYPHER_TOKEN": "${BLOCKCYPHER_TOKEN}",
+        "TRONGRID_API_KEY": "${TRONGRID_API_KEY}",
+        "BTC_WALLET": "${BTC_WALLET}",
+        "ETH_WALLET": "${ETH_WALLET}",
+        "TRON_WALLET": "${TRON_WALLET}"
     },
     "builds": [
         {
@@ -20,7 +27,7 @@
     "routes": [
         {
             "src": "/api/(.*)",
-            "dest": "/api/$1"
+            "dest": "server.js"
         },
         {
             "src": "/(.*)",

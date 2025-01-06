@@ -31,6 +31,9 @@ app.use((err, req, res, next) => {
     });
 });
 
+// Add this right after dotenv config
+console.log('MongoDB URI:', process.env.MONGODB_URI ? 'Is set' : 'Not set');
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
